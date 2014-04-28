@@ -30,11 +30,13 @@ $(OBJ) $(LIB) $(BIN):
 	mkdir $@
 
 
-$(BIN)netread: $(OBJ)netread.o | $(BIN)
+$(BIN)netread: $(OBJ)netread.o $(OBJ)packet.o | $(BIN)
 	$(CC) $^ -o $@ $(LDFLAGS)
+	sudo setcap cap_net_raw+ep $@
 
 $(BIN)netwrite: $(OBJ)netwrite.o | $(BIN)
 	$(CC) $^ -o $@ $(LDFLAGS)
+	sudo setcap cap_net_raw+ep $@
 
 $(BIN)netprint: $(OBJ)netprint.o $(LIB)libnetio.so | $(BIN)
 	$(CC) $^ -o $@ $(LDFLAGS) -L$(LIB) -lnetio
@@ -42,7 +44,7 @@ $(BIN)netprint: $(OBJ)netprint.o $(LIB)libnetio.so | $(BIN)
 
 $(LIB)libnetio.so: $(LIB)libnetio.so.$(VERSION) | $(LIB)
 	ln -s $(notdir $<) $@
-$(LIB)libnetio.so.$(VERSION): $(OBJ)netio.so | $(LIB)
+$(LIB)libnetio.so.$(VERSION): $(OBJ)netio.so $(OBJ)packet.so | $(LIB)
 	$(CC) $(LSFLAGS) $^ -o $@ $(LDFLAGS)
 
 

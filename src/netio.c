@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "netio.h"
+#include "netio/netio.h"
 
 
 void dummy(void)
