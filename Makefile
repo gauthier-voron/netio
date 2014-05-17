@@ -18,7 +18,7 @@ LDFLAGS :=
 LSFLAGS := -shared
 
 NETIO_OBJECTS += context header device raw   # netio core
-NETIO_OBJECTS += netio packet                # netio api
+NETIO_OBJECTS += packet                      # netio api
 
 
 MAKEFLAGS += -rR --no-print-directory
@@ -85,9 +85,9 @@ $(BIN)netprint: $(OBJ)netprint.o $(LIB)libnetio.so | $(BIN)
 	$(Q)$(CC) $^ -o $@ $(LDFLAGS) -L$(LIB) -lnetio
 
 
-$(LIB)libnetio.so: $(LIB)libnetio.so.$(VERSION) | $(LIB)
+$(LIB)libnetio.so: | $(LIB)libnetio.so.$(VERSION) $(LIB)
 	$(call cmd-print,  LN      $@)
-	$(Q)ln -s $(notdir $<) $@
+	$(Q)ln -s libnetio.so.$(VERSION) $@
 $(LIB)libnetio.so.$(VERSION): $(patsubst %,$(OBJ)%.so,$(NETIO_OBJECTS)) |$(LIB)
 	$(call cmd-print,  LD      $@)
 	$(Q)$(CC) $(LSFLAGS) $^ -o $@ $(LDFLAGS)

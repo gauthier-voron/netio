@@ -12,7 +12,8 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 			  const char *data, size_t size)
 {
 	if (cur->nh_protocol == NETIO_DEVICE_PROTOCOL)
-		printf("ifname = %s\n", ((netio_device_t *) cur)->ndev_ifname);
+		printf("ifname = %s\n",
+		       netio_device_getifname((netio_device_t *) cur));
 	return cur->nh_protocol->np_chain(ctx, cur, data, size);
 }
 
