@@ -9,12 +9,13 @@
 #define NETIO_PACKET_DATALEN   1500
 
 
-typedef struct
+struct netio_packet
 {
 	char      np_ifname[NETIO_PACKET_IFLEN];
 	size_t    np_size;
 	char      np_data[NETIO_PACKET_DATALEN];
-} netio_packet_t;
+} __attribute__((packed));
+typedef struct netio_packet netio_packet_t;
 
 
 int netio_packet_read(netio_packet_t *dest, int fd);
