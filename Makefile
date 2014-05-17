@@ -44,7 +44,9 @@ $(BIN)netprint: $(OBJ)netprint.o $(LIB)libnetio.so | $(BIN)
 
 $(LIB)libnetio.so: $(LIB)libnetio.so.$(VERSION) | $(LIB)
 	ln -s $(notdir $<) $@
-$(LIB)libnetio.so.$(VERSION): $(OBJ)netio.so $(OBJ)packet.so | $(LIB)
+$(LIB)libnetio.so.$(VERSION): $(OBJ)context.so $(OBJ)device.so \
+                              $(OBJ)header.so $(OBJ)netio.so \
+                              $(OBJ)packet.so $(OBJ)raw.so | $(LIB)
 	$(CC) $(LSFLAGS) $^ -o $@ $(LDFLAGS)
 
 
