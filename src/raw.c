@@ -36,10 +36,7 @@ netio_protocol_t *NETIO_RAW_PROTOCOL = &__NETIO_RAW_PROTOCOL;
 
 int netio_raw_init(netio_raw_t *this)
 {
-	this->nraw_header.nh_protocol = NETIO_RAW_PROTOCOL;
-	this->nraw_header.nh_next = NULL;
-	this->nraw_header.nh_prev = NULL;
-	this->nraw_header.nh_head = &this->nraw_header;
+	netio_header_init(&this->nraw_header, NETIO_RAW_PROTOCOL);
 	
 	this->nraw_data = NULL;
 	this->nraw_size = 0;

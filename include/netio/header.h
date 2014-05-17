@@ -11,12 +11,14 @@ typedef struct netio_header netio_header_t;
 
 struct netio_header
 {
-	netio_protocol_t     *nh_protocol;
-	struct netio_header  *nh_next;
-	struct netio_header  *nh_prev;
-	struct netio_header  *nh_head;
+	const netio_protocol_t  *nh_protocol;
+	struct netio_header     *nh_next;
+	struct netio_header     *nh_prev;
+	struct netio_header     *nh_head;
 };
 
+
+int netio_header_init(netio_header_t *this, const netio_protocol_t *protocol);
 
 int netio_header_link(netio_header_t *this, netio_header_t *prev);
 

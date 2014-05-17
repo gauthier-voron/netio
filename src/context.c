@@ -1,4 +1,5 @@
 #include "netio/context.h"
+#include "netio/device.h"
 #include "netio/raw.h"
 
 
@@ -28,9 +29,13 @@ int netio_context_init(netio_context_t *ctx)
 
 int netio_context_unpack(netio_context_t *this, const netio_packet_t *packet)
 {
-	const netio_protocol_t *next = NETIO_RAW_PROTOCOL;
-	return this->nc_at_chain(this, NULL, packet->np_data, packet->np_size,
-				 next);
+	netio_device_t dev;
+
+	netio_device_init(&dev);
+	netio_device_setifname(&dev, packet->np_ifname);
+
+	return this->nc_at_unpack(this, &dev.ndev_header, packet->np_data,
+				  packet->np_size);
 }
 
 
