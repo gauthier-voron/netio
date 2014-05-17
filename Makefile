@@ -4,6 +4,8 @@ OBJ := obj/
 BIN := bin/
 LIB := lib/
 
+V ?= 1
+
 MAJOR-VERSION:=0
 MINOR-VERSION:=0
 FIX-VERSION  :=0
@@ -15,47 +17,114 @@ CSFLAGS := -fPIC -DNETIO_VERSION=\"$(VERSION)\"
 LDFLAGS := 
 LSFLAGS := -shared
 
+NETIO_OBJECTS += context header device raw   # netio core
+NETIO_OBJECTS += netio packet                # netio api
+
+
+MAKEFLAGS += -rR --no-print-directory
+
+config-targets := clean .depends
+ifeq ($(filter $(config-targets), $(MAKECMDGOALS)),)
+  mode := build
+else
+  ifeq ($(filter-out $(config-targets), $(MAKECMDGOALS)),)
+    mode := config
+  else
+    mode := mixed
+  endif
+endif
+
+
+ifeq ($(mode),mixed)
+
+%:: _FORCE
+	@+$(MAKE) $@
+
+.PHONY: _FORCE
+_FORCE:
+
+else
+
 
 default: check
 
 
+ifeq ($(mode),build)
+  -include .depends
+endif
+
+
+.PHONY: all examples
 all: $(LIB)libnetio.so $(BIN)netread $(BIN)netwrite
 examples: $(BIN)netread $(BIN)netwrite $(BIN)netprint
 
+.PHONY: check
 check: $(BIN)netread $(BIN)netprint
 	./$(BIN)netread | ./$(BIN)netprint
 
 
 $(OBJ) $(LIB) $(BIN):
-	mkdir $@
+	$(call cmd-print,  MKDIR   $@)
+	$(Q)mkdir $@
 
 
 $(BIN)netread: $(OBJ)netread.o $(OBJ)packet.o | $(BIN)
-	$(CC) $^ -o $@ $(LDFLAGS)
-	sudo setcap cap_net_raw+ep $@
+	$(call cmd-print,  LD      $@)
+	$(Q)$(CC) $^ -o $@ $(LDFLAGS)
+	$(call cmd-print,  SETCAP  $@)
+	$(Q)sudo setcap cap_net_raw+ep $@
 
 $(BIN)netwrite: $(OBJ)netwrite.o | $(BIN)
-	$(CC) $^ -o $@ $(LDFLAGS)
-	sudo setcap cap_net_raw+ep $@
+	$(call cmd-print,  LD      $@)
+	$(Q)$(CC) $^ -o $@ $(LDFLAGS)
+	$(call cmd-print,  SETCAP  $@)
+	$(Q)sudo setcap cap_net_raw+ep $@
 
 $(BIN)netprint: $(OBJ)netprint.o $(LIB)libnetio.so | $(BIN)
-	$(CC) $^ -o $@ $(LDFLAGS) -L$(LIB) -lnetio
+	$(call cmd-print,  LD      $@)
+	$(Q)$(CC) $^ -o $@ $(LDFLAGS) -L$(LIB) -lnetio
 
 
 $(LIB)libnetio.so: $(LIB)libnetio.so.$(VERSION) | $(LIB)
-	ln -s $(notdir $<) $@
-$(LIB)libnetio.so.$(VERSION): $(OBJ)context.so $(OBJ)device.so \
-                              $(OBJ)header.so $(OBJ)netio.so \
-                              $(OBJ)packet.so $(OBJ)raw.so | $(LIB)
-	$(CC) $(LSFLAGS) $^ -o $@ $(LDFLAGS)
+	$(call cmd-print,  LN      $@)
+	$(Q)ln -s $(notdir $<) $@
+$(LIB)libnetio.so.$(VERSION): $(patsubst %,$(OBJ)%.so,$(NETIO_OBJECTS)) |$(LIB)
+	$(call cmd-print,  LD      $@)
+	$(Q)$(CC) $(LSFLAGS) $^ -o $@ $(LDFLAGS)
 
 
-$(OBJ)%.o: $(SRC)%.c $(wildcard $(INC)*.h) | $(OBJ)
-	$(CC) $(CCFLAGS) -c $< -o $@ -I$(INC)
+$(OBJ)%.o:
+	$(call cmd-print,  CC      $@)
+	$(Q)$(CC) $(CCFLAGS) -c $< -o $@ -I$(INC)
 
-$(OBJ)%.so: $(SRC)%.c $(wildcard $(INC)*.h) | $(OBJ)
-	$(CC) $(CCFLAGS) $(CSFLAGS) -c $< -o $@ -I$(INC)
+$(OBJ)%.so:
+	$(call cmd-print,  CC      $@)
+	$(Q)$(CC) $(CCFLAGS) $(CSFLAGS) -c $< -o $@ -I$(INC)
 
 
+.PHONY: clean
 clean:
-	-rm -rf $(OBJ) $(BIN) $(LIB) *~ $(SRC)*~ $(INC)*~
+	$(call cmd-print,  CLEAN)
+	-$(Q)rm -rf $(OBJ) $(BIN) $(LIB) *~ $(SRC)*~ $(INC)*~ $(INC)netio/*~
+	-$(Q)rm -rf .depends
+
+
+.depends: $(wildcard $(SRC)*.c)
+	$(call cmd-print,  MKDEP   $@)
+	$(Q)$(CC) -MM -I$(INC) $^ | sed -r \
+          -e 's/^([[:alnum:]_.]+)\.o/$$(OBJ)\1.o $$(OBJ)\1.so/' \
+          -e 's/\.h[[:space:]]*$$/.h | $$(OBJ)/' \
+        > $@
+
+endif
+
+
+ifneq ($(V),2)
+  Q := @
+endif
+
+ifeq ($(V),1)
+  define cmd-print
+    @echo '$1'
+  endef
+endif
