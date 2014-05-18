@@ -66,6 +66,19 @@ int netio_ethernet_init(netio_ethernet_t *this)
 }
 
 
+const char *netio_ethernet_typealias(int type)
+{
+	switch (type) {
+	case NETIO_ETHERNET_TYPE_IP:
+		return "ip";
+	case NETIO_ETHERNET_TYPE_ARP:
+		return "arp";
+	default:
+		return "unknown";
+	}
+}
+
+
 int netio_ethernet_setdest(netio_ethernet_t *this, const char *dest)
 {
 	this->neth_dest = dest;

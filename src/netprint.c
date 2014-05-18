@@ -35,7 +35,8 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 		       str[3] & 0xff, str[4] & 0xff, str[5] & 0xff);
 
 		i = netio_ethernet_gettype((netio_ethernet_t *) cur);
-		printf("  type = %04x\n", i);
+		printf("  type = %s (0x%04x)\n",
+		       netio_ethernet_typealias(i), i);
 	}
 
 	return cur->nh_protocol->np_chain(ctx, cur, data, size);

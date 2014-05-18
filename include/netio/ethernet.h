@@ -13,6 +13,10 @@ typedef struct netio_ethernet netio_ethernet_t;
 extern netio_protocol_t *NETIO_ETHERNET_PROTOCOL;
 
 
+#define NETIO_ETHERNET_TYPE_IP   0x0800
+#define NETIO_ETHERNET_TYPE_ARP  0x0806
+
+
 struct netio_ethernet
 {
 	netio_header_t   neth_header;
@@ -23,6 +27,9 @@ struct netio_ethernet
 
 
 int netio_ethernet_init(netio_ethernet_t *this);
+
+
+const char *netio_ethernet_typealias(int type);
 
 
 int netio_ethernet_setdest(netio_ethernet_t *this, const char *dest);
