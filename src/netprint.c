@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "netio/arp.h"
 #include "netio/context.h"
 #include "netio/device.h"
 #include "netio/ethernet.h"
@@ -13,6 +14,7 @@
 static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 			  const char *data, size_t size)
 {
+	netio_arp_t *arp;
 	netio_ethernet_t *eth;
 	netio_macaddr_t mac;
 	const char *str;
@@ -41,6 +43,17 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 		integer = netio_ethernet_gettype(eth);
 		printf("  type = %s (0x%04x)\n",
 		       netio_ethernet_typealias(integer), integer);
+
+	} else if (cur->nh_protocol == NETIO_ARP_PROTOCOL) {
+		arp = (netio_arp_t *) cur;
+		
+		printf("arp:\n");
+
+		printf("  hrd  = 0x%04x\n", netio_arp_gethrd(arp));
+		printf("  pro  = 0x%04x\n", netio_arp_getpro(arp));
+		printf("  hln  = %d\n", netio_arp_gethln(arp));
+		printf("  pln  = %d\n", netio_arp_getpln(arp));
+		printf("  op   = 0x%04x\n", netio_arp_getop(arp));
 	}
 
 	return cur->nh_protocol->np_chain(ctx, cur, data, size);
