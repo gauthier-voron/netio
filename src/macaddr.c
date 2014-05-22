@@ -49,13 +49,13 @@ int netio_macaddr_fromarr(netio_macaddr_t *this, const char *arr)
 }
 
 
-int netio_macaddr_tostr(const netio_macaddr_t *this, char *buf, size_t size)
+int netio_macaddr_tostr(const netio_macaddr_t *this, char *buf)
 {
-	return (snprintf(buf, size, "%02x:%02x:%02x:%02x:%02x:%02x",
-			 this->nmac_arr[0] & 0xff, this->nmac_arr[1] & 0xff,
-			 this->nmac_arr[2] & 0xff, this->nmac_arr[3] & 0xff,
-			 this->nmac_arr[4] & 0xff, this->nmac_arr[5] & 0xff)
-		== 17) ? 0 : -1;
+	sprintf(buf, "%02x:%02x:%02x:%02x:%02x:%02x",
+		this->nmac_arr[0] & 0xff, this->nmac_arr[1] & 0xff,
+		this->nmac_arr[2] & 0xff, this->nmac_arr[3] & 0xff,
+		this->nmac_arr[4] & 0xff, this->nmac_arr[5] & 0xff);
+	return 0;
 }
 
 int netio_macaddr_toarr(const netio_macaddr_t *this, char *arr)
