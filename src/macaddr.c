@@ -9,12 +9,14 @@ static const char *read_hex(unsigned char *dest, const char *str)
 	*dest = 0;
 
 	for (i=0; i<2; i++) {
+		*dest *= 16;
+
 		if (*str >= '0' && *str <= '9')
-			*dest = *str - '0';
+			*dest += *str - '0';
 		else if (*str >= 'a' && *str <= 'f')
-			*dest = *str - 'a';
+			*dest += *str - 'a';
 		else if (*str >= 'A' && *str <= 'F')
-			*dest = *str - 'A';
+			*dest += *str - 'A';
 		else
 			return NULL;
 
@@ -40,6 +42,13 @@ int netio_macaddr_fromstr(netio_macaddr_t *this, const char *str)
 	return 0;
 }
 
+int netio_macaddr_fromarr(netio_macaddr_t *this, const char *arr)
+{
+	*this = *((netio_macaddr_t *) arr);
+	return 0;
+}
+
+
 int netio_macaddr_tostr(const netio_macaddr_t *this, char *buf, size_t size)
 {
 	return (snprintf(buf, size, "%02x:%02x:%02x:%02x:%02x:%02x",
@@ -47,4 +56,10 @@ int netio_macaddr_tostr(const netio_macaddr_t *this, char *buf, size_t size)
 			 this->nmac_arr[2] & 0xff, this->nmac_arr[3] & 0xff,
 			 this->nmac_arr[4] & 0xff, this->nmac_arr[5] & 0xff)
 		== 17) ? 0 : -1;
+}
+
+int netio_macaddr_toarr(const netio_macaddr_t *this, char *arr)
+{
+	*((netio_macaddr_t *) arr) = *this;
+	return 0;
 }
