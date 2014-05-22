@@ -54,6 +54,16 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 		printf("  hln  = %d\n", netio_arp_gethln(arp));
 		printf("  pln  = %d\n", netio_arp_getpln(arp));
 		printf("  op   = 0x%04x\n", netio_arp_getop(arp));
+
+		if (netio_arp_gethrd(arp) == NETIO_ARP_HRD_ETHERNET) {
+			netio_macaddr_tostr(netio_arp_getsha(arp), buffer);
+			printf("  sha  = %s\n", buffer);
+		}
+
+		if (netio_arp_gethrd(arp) == NETIO_ARP_HRD_ETHERNET) {
+			netio_macaddr_tostr(netio_arp_gettha(arp), buffer);
+			printf("  tha  = %s\n", buffer);
+		}
 	}
 
 	return cur->nh_protocol->np_chain(ctx, cur, data, size);

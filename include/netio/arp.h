@@ -13,6 +13,14 @@ typedef struct netio_arp netio_arp_t;
 extern netio_protocol_t *NETIO_ARP_PROTOCOL;
 
 
+#define NETIO_ARP_HRD_ETHERNET     0x0001
+
+#define NETIO_ARP_PRO_IP           0x0800
+
+#define NETIO_ARP_OP_REQUEST       1
+#define NETIO_ARP_OP_REPLY         2
+
+
 struct netio_arp
 {
 	netio_header_t   narp_header;
