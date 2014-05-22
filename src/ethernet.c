@@ -15,6 +15,7 @@ static int netio_ethernet_unpack(netio_context_t *ctx, netio_header_t *prev,
 				 const char *data, size_t size)
 {
 	netio_ethernet_t eth;
+	netio_macaddr_t mac;
 	const struct __ethernet *__eth;
 
 	if (size < sizeof(struct __ethernet))
@@ -24,8 +25,10 @@ static int netio_ethernet_unpack(netio_context_t *ctx, netio_header_t *prev,
 	netio_header_link(&eth.neth_header, prev);
 
 	__eth = (const struct __ethernet *) data;
-	netio_ethernet_setdest(&eth, (const char *) __eth->dest);
-	netio_ethernet_setsrc(&eth, (const char *) __eth->src);
+	netio_macaddr_fromarr(&mac, (const char *) __eth->dest);
+	netio_ethernet_setdest(&eth, &mac);
+	netio_macaddr_fromarr(&mac, (const char *) __eth->src);
+	netio_ethernet_setsrc(&eth, &mac);
 	netio_ethernet_settype(&eth, ntohs(__eth->type));
 
 	data += sizeof(struct __ethernet);
@@ -58,8 +61,8 @@ int netio_ethernet_init(netio_ethernet_t *this)
 {
 	netio_header_init(&this->neth_header, NETIO_ETHERNET_PROTOCOL);
 	
-	this->neth_dest = NULL;
-	this->neth_src  = NULL;
+	netio_macaddr_init(&this->neth_dest);
+	netio_macaddr_init(&this->neth_src);
 	this->neth_type = 0;
 
 	return 0;
@@ -79,15 +82,15 @@ const char *netio_ethernet_typealias(int type)
 }
 
 
-int netio_ethernet_setdest(netio_ethernet_t *this, const char *dest)
+int netio_ethernet_setdest(netio_ethernet_t *this, const netio_macaddr_t *dst)
 {
-	this->neth_dest = dest;
+	this->neth_dest = *dst;
 	return 0;
 }
 
-int netio_ethernet_setsrc(netio_ethernet_t *this, const char *src)
+int netio_ethernet_setsrc(netio_ethernet_t *this, const netio_macaddr_t *src)
 {
-	this->neth_src = src;
+	this->neth_src = *src;
 	return 0;
 
 }
@@ -99,14 +102,16 @@ int netio_ethernet_settype(netio_ethernet_t *this, int type)
 }
 
 
-const char *netio_ethernet_getdest(const netio_ethernet_t *this)
+int netio_ethernet_getdest(const netio_ethernet_t *this, netio_macaddr_t *dst)
 {
-	return this->neth_dest;
+	*dst = this->neth_dest;
+	return 0;
 }
 
-const char *netio_ethernet_getsrc(const netio_ethernet_t *this)
+int netio_ethernet_getsrc(const netio_ethernet_t *this, netio_macaddr_t *src)
 {
-	return this->neth_src;
+	*src = this->neth_src;
+	return 0;
 }
 
 int netio_ethernet_gettype(const netio_ethernet_t *this)
