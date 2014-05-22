@@ -1,16 +1,28 @@
+#include <string.h>
 #include "netio/device.h"
+#include "netio/ethernet.h"
 #include "netio/raw.h"
 
 
-static int netio_dev_chain(netio_context_t *ctx, netio_raw_t *cur,
+static int netio_dev_chain(netio_context_t *ctx, netio_device_t *cur,
 			   const char *data, size_t size)
 {
 	const netio_protocol_t *next = NULL;
 
-	if (size > 0)
-		next = NETIO_RAW_PROTOCOL;
+	if (size == 0)
+		goto ret;
 
-	return ctx->nc_at_chain(ctx, &cur->nraw_header, data, size, next);
+	switch (cur->ndev_ifname[0]) {
+	case 'e':
+		next = NETIO_ETHERNET_PROTOCOL;
+		break;
+	default:
+		next = NETIO_RAW_PROTOCOL;
+		break;
+	}
+
+ ret:
+	return ctx->nc_at_chain(ctx, &cur->ndev_header, data, size, next);
 }
 
 
