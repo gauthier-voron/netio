@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "netio/macaddr.h"
 
 
@@ -24,6 +25,13 @@ static const char *read_hex(unsigned char *dest, const char *str)
 	}
 
 	return str;
+}
+
+
+int netio_macaddr_init(netio_macaddr_t *this)
+{
+	memset(this->nmac_arr, 0, sizeof(this->nmac_arr));
+	return 0;
 }
 
 

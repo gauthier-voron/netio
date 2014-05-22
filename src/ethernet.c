@@ -61,6 +61,8 @@ int netio_ethernet_init(netio_ethernet_t *this)
 {
 	netio_header_init(&this->neth_header, NETIO_ETHERNET_PROTOCOL);
 	
+	netio_macaddr_init(&this->neth_dest);
+	netio_macaddr_init(&this->neth_src);
 	this->neth_type = 0;
 
 	return 0;

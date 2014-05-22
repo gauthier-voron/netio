@@ -11,6 +11,9 @@ typedef struct
 } netio_macaddr_t;
 
 
+int netio_macaddr_init(netio_macaddr_t *this);
+
+
 int netio_macaddr_fromstr(netio_macaddr_t *this, const char *str);
 
 int netio_macaddr_fromarr(netio_macaddr_t *this, const char *arr);
