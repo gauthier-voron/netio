@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
 #include <stdint.h>
+#include "netio/arp.h"
 #include "netio/ethernet.h"
 #include "netio/raw.h"
 
@@ -42,9 +43,19 @@ static int netio_ethernet_chain(netio_context_t *ctx, netio_ethernet_t *cur,
 {
 	const netio_protocol_t *next = NULL;
 
-	if (size > 0)
-		next = NETIO_RAW_PROTOCOL;
+	if (size == 0)
+		goto ret;
 
+	switch (cur->neth_type) {
+	case NETIO_ETHERNET_TYPE_ARP:
+		next = NETIO_ARP_PROTOCOL;
+		break;
+	default:
+		next = NETIO_RAW_PROTOCOL;
+		break;
+	}
+
+ ret:
 	return ctx->nc_at_chain(ctx, &cur->neth_header, data, size, next);
 }
 
