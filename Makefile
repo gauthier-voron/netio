@@ -18,7 +18,7 @@ LDFLAGS :=
 LSFLAGS := -shared
 
 NETIO_OBJECTS += context header device raw   # netio core
-NETIO_OBJECTS += packet macaddr              # netio api
+NETIO_OBJECTS += packet ipaddr macaddr       # netio api
 NETIO_OBJECTS += arp ethernet                # netio protocols
 
 

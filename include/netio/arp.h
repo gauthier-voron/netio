@@ -39,6 +39,13 @@ struct netio_arp
 int netio_arp_init(netio_arp_t *this);
 
 
+const char *netio_arp_hrdalias(int hrd);
+
+const char *netio_arp_proalias(int pro);
+
+const char *netio_arp_opalias(int op);
+
+
 int netio_arp_sethrd(netio_arp_t *this, int hrd);
 
 int netio_arp_setpro(netio_arp_t *this, int pro);

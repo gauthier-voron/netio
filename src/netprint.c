@@ -5,6 +5,7 @@
 #include "netio/context.h"
 #include "netio/device.h"
 #include "netio/ethernet.h"
+#include "netio/ipaddr.h"
 #include "netio/macaddr.h"
 #include "netio/netio.h"
 #include "netio/packet.h"
@@ -49,20 +50,36 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 		
 		printf("arp:\n");
 
-		printf("  hrd  = 0x%04x\n", netio_arp_gethrd(arp));
-		printf("  pro  = 0x%04x\n", netio_arp_getpro(arp));
+		integer = netio_arp_gethrd(arp);
+		printf("  hrd  = %s (0x%04x)\n",
+		       netio_arp_hrdalias(integer), integer);
+		integer = netio_arp_getpro(arp);
+		printf("  pro  = %s (0x%04x)\n",
+		       netio_arp_proalias(integer), integer);
 		printf("  hln  = %d\n", netio_arp_gethln(arp));
 		printf("  pln  = %d\n", netio_arp_getpln(arp));
-		printf("  op   = 0x%04x\n", netio_arp_getop(arp));
+		integer = netio_arp_getop(arp);
+		printf("  op   = %s (0x%04x)\n",
+		       netio_arp_opalias(integer), integer);
 
 		if (netio_arp_gethrd(arp) == NETIO_ARP_HRD_ETHERNET) {
 			netio_macaddr_tostr(netio_arp_getsha(arp), buffer);
 			printf("  sha  = %s\n", buffer);
 		}
 
+		if (netio_arp_getpro(arp) == NETIO_ARP_PRO_IP) {
+			netio_ipaddr_tostr(netio_arp_getspa(arp), buffer);
+			printf("  spa  = %s\n", buffer);
+		}
+
 		if (netio_arp_gethrd(arp) == NETIO_ARP_HRD_ETHERNET) {
 			netio_macaddr_tostr(netio_arp_gettha(arp), buffer);
 			printf("  tha  = %s\n", buffer);
+		}
+
+		if (netio_arp_getpro(arp) == NETIO_ARP_PRO_IP) {
+			netio_ipaddr_tostr(netio_arp_gettpa(arp), buffer);
+			printf("  tpa  = %s\n", buffer);
 		}
 	}
 

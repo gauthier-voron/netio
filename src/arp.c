@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "netio/arp.h"
+#include "netio/ipaddr.h"
 #include "netio/macaddr.h"
 #include "netio/raw.h"
 
@@ -54,6 +55,20 @@ static int netio_arp_unpack(netio_context_t *ctx, netio_header_t *prev,
 		netio_arp_settha(&arp, ptr);
 	}
 
+	if (netio_arp_getpro(&arp) == NETIO_ARP_PRO_IP) {
+		incr = sizeof(struct __arp);
+		incr += netio_arp_gethln(&arp);
+		ptr = alloca(sizeof(netio_ipaddr_t));
+		netio_ipaddr_fromarr(ptr, data + incr);
+		netio_arp_setspa(&arp, ptr);
+
+		incr += netio_arp_getpln(&arp);
+		incr += netio_arp_gethln(&arp);
+		ptr = alloca(sizeof(netio_ipaddr_t));
+		netio_ipaddr_fromarr(ptr, data + incr);
+		netio_arp_settpa(&arp, ptr);
+	}
+
 	incr = sizeof(struct __arp)
 		+ 2 * netio_arp_gethln(&arp)
 		+ 2 * netio_arp_getpln(&arp);
@@ -94,6 +109,39 @@ int netio_arp_init(netio_arp_t *this)
 	this->narp_op  = 0;
 
 	return 0;
+}
+
+
+const char *netio_arp_hrdalias(int hrd)
+{
+	switch (hrd) {
+	case NETIO_ARP_HRD_ETHERNET:
+		return "ethernet";
+	default:
+		return "unknown";
+	}
+}
+
+const char *netio_arp_proalias(int pro)
+{
+	switch (pro) {
+	case NETIO_ARP_PRO_IP:
+		return "ip";
+	default:
+		return "unknown";
+	}
+}
+
+const char *netio_arp_opalias(int op)
+{
+	switch (op) {
+	case NETIO_ARP_OP_REQUEST:
+		return "request";
+	case NETIO_ARP_OP_REPLY:
+		return "reply";
+	default:
+		return "unknown";
+	}
 }
 
 
