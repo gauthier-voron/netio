@@ -41,10 +41,11 @@ int netio_macaddr_fromstr(netio_macaddr_t *this, const char *str)
 
 	for (i=0; i<6; i++) {
 		str = read_hex(&this->nmac_arr[i], str);
+		if (i == 5)
+			break;
 		if (!str || *str != ':')
 			return -1;
-		if (i < 5)
-			str++;
+		str++;
 	}
 
 	return 0;

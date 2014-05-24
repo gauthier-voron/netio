@@ -20,10 +20,10 @@ extern netio_protocol_t *NETIO_ETHERNET_PROTOCOL;
 
 struct netio_ethernet
 {
-	netio_header_t   neth_header;
-	netio_macaddr_t  neth_dest;
-	netio_macaddr_t  neth_src;
-	int              neth_type;
+	netio_header_t    neth_header;
+	netio_macaddr_t  *neth_dest;
+	netio_macaddr_t  *neth_src;
+	int               neth_type;
 };
 
 
@@ -33,16 +33,16 @@ int netio_ethernet_init(netio_ethernet_t *this);
 const char *netio_ethernet_typealias(int type);
 
 
-int netio_ethernet_setdest(netio_ethernet_t *this, const netio_macaddr_t *dst);
+int netio_ethernet_setdest(netio_ethernet_t *this, netio_macaddr_t *dst);
 
-int netio_ethernet_setsrc(netio_ethernet_t *this, const netio_macaddr_t *src);
+int netio_ethernet_setsrc(netio_ethernet_t *this, netio_macaddr_t *src);
 
 int netio_ethernet_settype(netio_ethernet_t *this, int type);
 
 
-int netio_ethernet_getdest(const netio_ethernet_t *this, netio_macaddr_t *dst);
+netio_macaddr_t *netio_ethernet_getdest(const netio_ethernet_t *this);
 
-int netio_ethernet_getsrc(const netio_ethernet_t *this, netio_macaddr_t *src);
+netio_macaddr_t *netio_ethernet_getsrc(const netio_ethernet_t *this);
 
 int netio_ethernet_gettype(const netio_ethernet_t *this);
 
