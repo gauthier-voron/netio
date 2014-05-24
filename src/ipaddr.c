@@ -40,7 +40,7 @@ int netio_ipaddr_fromstr(netio_ipaddr_t *this, const char *str)
 
 	for (i=0; i<4; i++) {
 		str = read_dbyte(&this->nip_arr[i], str);
-		if (i == 5)
+		if (i == 3)
 			break;
 		if (!str || *str != '.')
 			return -1;

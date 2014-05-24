@@ -17,7 +17,6 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 {
 	netio_arp_t *arp;
 	netio_ethernet_t *eth;
-	netio_macaddr_t mac;
 	const char *str;
 	char buffer[18];
 	int integer;
@@ -33,12 +32,10 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 
 		printf("ethernet:\n");
 
-		netio_ethernet_getdest(eth, &mac);
-		netio_macaddr_tostr(&mac, buffer);
+		netio_macaddr_tostr(netio_ethernet_getdest(eth), buffer);
 		printf("  dest = %s\n", buffer);
 
-		netio_ethernet_getsrc(eth, &mac);
-		netio_macaddr_tostr(&mac, buffer);
+		netio_macaddr_tostr(netio_ethernet_getsrc(eth), buffer);
 		printf("  src  = %s\n", buffer);
 
 		integer = netio_ethernet_gettype(eth);
