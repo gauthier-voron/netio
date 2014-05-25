@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <string.h>
 #include "netio/device.h"
 #include "netio/ethernet.h"
@@ -25,10 +26,20 @@ static int netio_dev_chain(netio_context_t *ctx, netio_device_t *cur,
 	return ctx->nc_at_chain(ctx, &cur->ndev_header, data, size, next);
 }
 
+static int netio_dev_print(netio_context_t *ctx, FILE *f,
+			   const netio_device_t *cur)
+{
+	fprintf(f, "device\n");
+	fprintf(f, "%-30s %s\n", "  interface name", cur->ndev_ifname);
+	return ctx->nc_at_print(ctx, f, &cur->ndev_header,
+				cur->ndev_header.nh_next);
+}
+
 
 netio_protocol_t __NETIO_DEVICE_PROTOCOL = {
 	(netio_unpack_t) NULL,
-	(netio_chain_t)  netio_dev_chain
+	(netio_chain_t)  netio_dev_chain,
+	(netio_print_t)  netio_dev_print
 };
 
 netio_protocol_t *NETIO_DEVICE_PROTOCOL = &__NETIO_DEVICE_PROTOCOL;

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "netio/raw.h"
 
 
@@ -25,10 +26,91 @@ static int netio_raw_chain(netio_context_t *ctx, netio_raw_t *cur,
 	return ctx->nc_at_chain(ctx, &cur->nraw_header, data, size, next);
 }
 
+static char saferepr(char c)
+{
+	if (c < 33 || c > 126)
+		return '.';
+	return c;
+}
+
+static int netio_raw_print(netio_context_t *ctx, FILE *f,
+			   const netio_raw_t *cur)
+{
+	int i;
+	unsigned int line = 0;
+
+	fprintf(f, "raw\n");
+
+	while (cur->nraw_size - line * 16 > 16) {
+		fprintf(f, "  %06x   ", line);
+		for (i=0; i<8; i++)
+			fprintf(f, "%02x ",
+				cur->nraw_data[line*16 + i] & 0xff);
+		fprintf(f, " ");
+		for (i=8; i<16; i++)
+			fprintf(f, "%02x ",
+				cur->nraw_data[line*16 + i] & 0xff);
+		fprintf(f, "  ");
+		
+		for (i=0; i<8; i++)
+			fprintf(f, "%c",
+				saferepr(cur->nraw_data[line*16 + i]));
+		fprintf(f, " ");
+		for (i=8; i<16; i++)
+			fprintf(f, "%c",
+				saferepr(cur->nraw_data[line*16 + i]));
+		fprintf(f, "\n");
+
+		line++;
+	}
+
+
+	if (cur->nraw_size == line * 16)
+		goto ret;
+
+
+	fprintf(f, "  %06x   ", line);
+
+	for (i=0; i<8; i++)
+		if (line*16 + i < cur->nraw_size)
+			fprintf(f, "%02x ",
+				cur->nraw_data[line*16 + i] & 0xff);
+		else
+			fprintf(f, "   ");
+	fprintf(f, " ");
+	for (i=8; i<16; i++)
+		if (line*16 + i < cur->nraw_size)
+			fprintf(f, "%02x ",
+				cur->nraw_data[line*16 + i] & 0xff);
+		else
+			fprintf(f, "   ");
+	fprintf(f, "  ");
+
+	for (i=0; i<8; i++)
+		if (line*16 + i < cur->nraw_size)
+			fprintf(f, "%c",
+				saferepr(cur->nraw_data[line*16 + i]));
+		else
+			fprintf(f, " ");
+	fprintf(f, " ");
+	for (i=8; i<16; i++)
+		if (line*16 + i < cur->nraw_size)
+			fprintf(f, "%c",
+				saferepr(cur->nraw_data[line*16 + i]));
+		else
+			fprintf(f, " ");
+	fprintf(f, "\n");
+
+ ret:
+	return ctx->nc_at_print(ctx, f, &cur->nraw_header,
+				cur->nraw_header.nh_next);
+}
+
 
 netio_protocol_t __NETIO_RAW_PROTOCOL = {
 	(netio_unpack_t) netio_raw_unpack,
-	(netio_chain_t)  netio_raw_chain
+	(netio_chain_t)  netio_raw_chain,
+	(netio_print_t)  netio_raw_print
 };
 
 netio_protocol_t *NETIO_RAW_PROTOCOL = &__NETIO_RAW_PROTOCOL;
