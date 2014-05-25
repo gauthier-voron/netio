@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <stdio.h>
 #include <stdint.h>
 #include "netio/arp.h"
 #include "netio/ethernet.h"
@@ -59,10 +60,33 @@ static int netio_ethernet_chain(netio_context_t *ctx, netio_ethernet_t *cur,
 	return ctx->nc_at_chain(ctx, &cur->neth_header, data, size, next);
 }
 
+static int netio_ethernet_print(netio_context_t *ctx,
+				const netio_ethernet_t *cur)
+{
+	int tmp;
+	char buffer[32];
+
+	printf("ethernet\n");
+
+	netio_macaddr_tostr(netio_ethernet_getdest(cur), buffer);
+	printf("%-30s %s\n", "  destination", buffer);
+
+	netio_macaddr_tostr(netio_ethernet_getsrc(cur), buffer);
+	printf("%-30s %s\n", "  source", buffer);
+	
+	tmp = netio_ethernet_gettype(cur);
+	printf("%-30s %s (0x%04x)\n", "  type", netio_ethernet_typealias(tmp),
+	       tmp);
+
+	return ctx->nc_at_print(ctx, &cur->neth_header,
+				cur->neth_header.nh_next);
+}
+
 
 netio_protocol_t __NETIO_ETHERNET_PROTOCOL = {
 	(netio_unpack_t) netio_ethernet_unpack,
-	(netio_chain_t)  netio_ethernet_chain
+	(netio_chain_t)  netio_ethernet_chain,
+	(netio_print_t)  netio_ethernet_print
 };
 
 netio_protocol_t *NETIO_ETHERNET_PROTOCOL = &__NETIO_ETHERNET_PROTOCOL;

@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include "netio/arp.h"
@@ -89,10 +90,49 @@ static int netio_arp_chain(netio_context_t *ctx, netio_arp_t *cur,
 	return ctx->nc_at_chain(ctx, &cur->narp_header, data, size, next);
 }
 
+static int netio_arp_print(netio_context_t *ctx, const netio_arp_t *cur)
+{
+	int tmp;
+	char buffer[32];
+
+	printf("arp\n");
+	
+	tmp = netio_arp_gethrd(cur);
+	printf("%-30s %s (0x%04x)\n", "  hardware type",
+	       netio_arp_hrdalias(tmp), tmp);
+
+	tmp = netio_arp_getpro(cur);
+	printf("%-30s %s (0x%04x)\n", "  protocol type",
+	       netio_arp_proalias(tmp), tmp);
+
+	printf("%-30s %d\n", "  hardware length", netio_arp_gethln(cur));
+	printf("%-30s %d\n", "  protocole length", netio_arp_getpln(cur));
+
+	tmp = netio_arp_getop(cur);
+	printf("%-30s %s (0x%04x)\n", "  operation code",
+	       netio_arp_opalias(tmp), tmp);
+
+	netio_macaddr_tostr(netio_arp_getsha(cur), buffer);
+	printf("%-30s %s\n", "  hardware source", buffer);
+
+	netio_ipaddr_tostr(netio_arp_getspa(cur), buffer);
+	printf("%-30s %s\n", "  protocol source", buffer);
+
+	netio_macaddr_tostr(netio_arp_gettha(cur), buffer);
+	printf("%-30s %s\n", "  hardware target", buffer);
+
+	netio_ipaddr_tostr(netio_arp_gettpa(cur), buffer);
+	printf("%-30s %s\n", "  protocol target", buffer);
+
+	return ctx->nc_at_print(ctx, &cur->narp_header,
+				cur->narp_header.nh_next);
+}
+
 
 netio_protocol_t __NETIO_ARP_PROTOCOL = {
 	(netio_unpack_t) netio_arp_unpack,
-	(netio_chain_t)  netio_arp_chain
+	(netio_chain_t)  netio_arp_chain,
+	(netio_print_t)  netio_arp_print
 };
 
 netio_protocol_t *NETIO_ARP_PROTOCOL = &__NETIO_ARP_PROTOCOL;
