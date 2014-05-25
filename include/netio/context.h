@@ -32,7 +32,7 @@ typedef int (*netio_at_chain_t)(netio_context_t *ctx, netio_header_t *prev,
 				const char *payload, size_t size,
 				const netio_protocol_t *next);
 
-typedef int (*netio_at_print_t)(netio_context_t *ctx,
+typedef int (*netio_at_print_t)(netio_context_t *ctx, FILE *f,
 				const netio_header_t *prev,
 				const netio_header_t *next);
 
@@ -49,7 +49,8 @@ int netio_context_init(netio_context_t *this);
 
 int netio_context_unpack(netio_context_t *this, const netio_packet_t *packet);
 
-int netio_context_print(netio_context_t *this, const netio_header_t *header);
+int netio_context_print(netio_context_t *this, FILE *f,
+			const netio_header_t *header);
 
 
 int netio_context_setatunpack(netio_context_t *this, netio_at_unpack_t handle);

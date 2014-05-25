@@ -6,6 +6,7 @@ struct netio_protocol;
 typedef struct netio_protocol netio_protocol_t;
 
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "netio/context.h"
 #include "netio/protocol.h"
@@ -35,7 +36,8 @@ typedef int (*netio_unpack_t)(netio_context_t *ctx, netio_header_t *prev,
 typedef int (*netio_chain_t)(netio_context_t *ctx, netio_header_t *cur,
 			     const char *data, size_t size);
 
-typedef int (*netio_print_t)(netio_context_t *ctx, const netio_header_t *cur);
+typedef int (*netio_print_t)(netio_context_t *ctx, FILE *f,
+			     const netio_header_t *cur);
 
 
 struct netio_protocol

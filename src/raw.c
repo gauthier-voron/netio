@@ -33,28 +33,33 @@ static char saferepr(char c)
 	return c;
 }
 
-static int netio_raw_print(netio_context_t *ctx, const netio_raw_t *cur)
+static int netio_raw_print(netio_context_t *ctx, FILE *f,
+			   const netio_raw_t *cur)
 {
 	int i;
 	unsigned int line = 0;
 
-	printf("raw\n");
+	fprintf(f, "raw\n");
 
 	while (cur->nraw_size - line * 16 > 16) {
-		printf("  %06x   ", line);
+		fprintf(f, "  %06x   ", line);
 		for (i=0; i<8; i++)
-			printf("%02x ", cur->nraw_data[line*16 + i] & 0xff);
-		printf(" ");
+			fprintf(f, "%02x ",
+				cur->nraw_data[line*16 + i] & 0xff);
+		fprintf(f, " ");
 		for (i=8; i<16; i++)
-			printf("%02x ", cur->nraw_data[line*16 + i] & 0xff);
-		printf("  ");
+			fprintf(f, "%02x ",
+				cur->nraw_data[line*16 + i] & 0xff);
+		fprintf(f, "  ");
 		
 		for (i=0; i<8; i++)
-			printf("%c", saferepr(cur->nraw_data[line*16 + i]));
-		printf(" ");
+			fprintf(f, "%c",
+				saferepr(cur->nraw_data[line*16 + i]));
+		fprintf(f, " ");
 		for (i=8; i<16; i++)
-			printf("%c", saferepr(cur->nraw_data[line*16 + i]));
-		printf("\n");
+			fprintf(f, "%c",
+				saferepr(cur->nraw_data[line*16 + i]));
+		fprintf(f, "\n");
 
 		line++;
 	}
@@ -64,36 +69,40 @@ static int netio_raw_print(netio_context_t *ctx, const netio_raw_t *cur)
 		goto ret;
 
 
-	printf("  %06x   ", line);
+	fprintf(f, "  %06x   ", line);
 
 	for (i=0; i<8; i++)
 		if (line*16 + i < cur->nraw_size)
-			printf("%02x ", cur->nraw_data[line*16 + i] & 0xff);
+			fprintf(f, "%02x ",
+				cur->nraw_data[line*16 + i] & 0xff);
 		else
-			printf("   ");
-	printf(" ");
+			fprintf(f, "   ");
+	fprintf(f, " ");
 	for (i=8; i<16; i++)
 		if (line*16 + i < cur->nraw_size)
-			printf("%02x ", cur->nraw_data[line*16 + i] & 0xff);
+			fprintf(f, "%02x ",
+				cur->nraw_data[line*16 + i] & 0xff);
 		else
-			printf("   ");
-	printf("  ");
+			fprintf(f, "   ");
+	fprintf(f, "  ");
 
 	for (i=0; i<8; i++)
 		if (line*16 + i < cur->nraw_size)
-			printf("%c", saferepr(cur->nraw_data[line*16 + i]));
+			fprintf(f, "%c",
+				saferepr(cur->nraw_data[line*16 + i]));
 		else
-			printf(" ");
-	printf(" ");
+			fprintf(f, " ");
+	fprintf(f, " ");
 	for (i=8; i<16; i++)
 		if (line*16 + i < cur->nraw_size)
-			printf("%c", saferepr(cur->nraw_data[line*16 + i]));
+			fprintf(f, "%c",
+				saferepr(cur->nraw_data[line*16 + i]));
 		else
-			printf(" ");
-	printf("\n");
+			fprintf(f, " ");
+	fprintf(f, "\n");
 
  ret:
-	return ctx->nc_at_print(ctx, &cur->nraw_header,
+	return ctx->nc_at_print(ctx, f, &cur->nraw_header,
 				cur->nraw_header.nh_next);
 }
 

@@ -60,25 +60,25 @@ static int netio_ethernet_chain(netio_context_t *ctx, netio_ethernet_t *cur,
 	return ctx->nc_at_chain(ctx, &cur->neth_header, data, size, next);
 }
 
-static int netio_ethernet_print(netio_context_t *ctx,
+static int netio_ethernet_print(netio_context_t *ctx, FILE *f,
 				const netio_ethernet_t *cur)
 {
 	int tmp;
 	char buffer[32];
 
-	printf("ethernet\n");
+	fprintf(f, "ethernet\n");
 
 	netio_macaddr_tostr(netio_ethernet_getdest(cur), buffer);
-	printf("%-30s %s\n", "  destination", buffer);
+	fprintf(f, "%-30s %s\n", "  destination", buffer);
 
 	netio_macaddr_tostr(netio_ethernet_getsrc(cur), buffer);
-	printf("%-30s %s\n", "  source", buffer);
+	fprintf(f, "%-30s %s\n", "  source", buffer);
 	
 	tmp = netio_ethernet_gettype(cur);
-	printf("%-30s %s (0x%04x)\n", "  type", netio_ethernet_typealias(tmp),
-	       tmp);
+	fprintf(f, "%-30s %s (0x%04x)\n", "  type",
+		netio_ethernet_typealias(tmp), tmp);
 
-	return ctx->nc_at_print(ctx, &cur->neth_header,
+	return ctx->nc_at_print(ctx, f, &cur->neth_header,
 				cur->neth_header.nh_next);
 }
 

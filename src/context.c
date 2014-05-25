@@ -18,14 +18,14 @@ static int netio_context_at_chain(netio_context_t *ctx, netio_header_t *prev,
 	return next->np_unpack(ctx, prev, payload, size);
 }
 
-static int netio_context_at_print(netio_context_t *ctx,
+static int netio_context_at_print(netio_context_t *ctx, FILE *f,
 				  const netio_header_t *prev
 				  __attribute__((unused)),
 				  const netio_header_t *next)
 {
 	if (!next)
 		return 0;
-	return next->nh_protocol->np_print(ctx, next);
+	return next->nh_protocol->np_print(ctx, f, next);
 }
 
 
@@ -49,9 +49,10 @@ int netio_context_unpack(netio_context_t *this, const netio_packet_t *packet)
 				  packet->np_size);
 }
 
-int netio_context_print(netio_context_t *this, const netio_header_t *header)
+int netio_context_print(netio_context_t *this, FILE *f,
+			const netio_header_t *header)
 {
-	return netio_context_at_print(this, header->nh_prev, header);
+	return netio_context_at_print(this, f, header->nh_prev, header);
 }
 
 
