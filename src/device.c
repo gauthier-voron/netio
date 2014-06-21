@@ -35,11 +35,25 @@ static int netio_dev_print(netio_context_t *ctx, FILE *f,
 				cur->ndev_header.nh_next);
 }
 
+static int netio_dev_reply(netio_context_t *ctx, netio_header_t *next,
+			   const netio_device_t *req)
+{
+	netio_device_t rep;
+
+	netio_device_init(&rep);
+	netio_header_fill(&rep.ndev_header, next);
+
+	netio_device_setifname(&rep, netio_device_getifname(req));
+
+	return ctx->nc_at_reply(ctx, &rep.ndev_header, &req->ndev_header);
+}
+
 
 netio_protocol_t __NETIO_DEVICE_PROTOCOL = {
 	(netio_unpack_t) NULL,
 	(netio_chain_t)  netio_dev_chain,
-	(netio_print_t)  netio_dev_print
+	(netio_print_t)  netio_dev_print,
+	(netio_reply_t)  netio_dev_reply
 };
 
 netio_protocol_t *NETIO_DEVICE_PROTOCOL = &__NETIO_DEVICE_PROTOCOL;

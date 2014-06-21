@@ -129,11 +129,28 @@ static int netio_arp_print(netio_context_t *ctx, FILE *f,
 				cur->narp_header.nh_next);
 }
 
+static int netio_arp_reply(netio_context_t *ctx, netio_header_t *next,
+			   const netio_arp_t *req)
+{
+	netio_arp_t rep;
+
+	netio_arp_init(&rep);
+	netio_header_fill(&rep.narp_header, next);
+
+	netio_arp_setsha(&rep, alloca(netio_arp_gethln(req)));
+	netio_arp_setspa(&rep, alloca(netio_arp_getpln(req)));
+	netio_arp_settha(&rep, alloca(netio_arp_gethln(req)));
+	netio_arp_settpa(&rep, alloca(netio_arp_getpln(req)));
+
+	return ctx->nc_at_reply(ctx, &rep.narp_header, &req->narp_header);
+}
+
 
 netio_protocol_t __NETIO_ARP_PROTOCOL = {
 	(netio_unpack_t) netio_arp_unpack,
 	(netio_chain_t)  netio_arp_chain,
-	(netio_print_t)  netio_arp_print
+	(netio_print_t)  netio_arp_print,
+	(netio_reply_t)  netio_arp_reply
 };
 
 netio_protocol_t *NETIO_ARP_PROTOCOL = &__NETIO_ARP_PROTOCOL;

@@ -106,11 +106,25 @@ static int netio_raw_print(netio_context_t *ctx, FILE *f,
 				cur->nraw_header.nh_next);
 }
 
+static int netio_raw_reply(netio_context_t *ctx, netio_header_t *next,
+			   const netio_raw_t *req)
+{
+	netio_raw_t rep;
+
+	netio_raw_init(&rep);
+	netio_header_fill(&rep.nraw_header, next);
+
+	netio_raw_setdata(&rep, netio_raw_getdata(req), netio_raw_getsize(req));
+
+	return ctx->nc_at_reply(ctx, &rep.nraw_header, &req->nraw_header);
+}
+
 
 netio_protocol_t __NETIO_RAW_PROTOCOL = {
 	(netio_unpack_t) netio_raw_unpack,
 	(netio_chain_t)  netio_raw_chain,
-	(netio_print_t)  netio_raw_print
+	(netio_print_t)  netio_raw_print,
+	(netio_reply_t)  netio_raw_reply
 };
 
 netio_protocol_t *NETIO_RAW_PROTOCOL = &__NETIO_RAW_PROTOCOL;
