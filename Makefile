@@ -19,7 +19,7 @@ LSFLAGS := -shared
 
 NETIO_OBJECTS += context header device raw   # netio core
 NETIO_OBJECTS += packet ipaddr macaddr       # netio api
-NETIO_OBJECTS += arp ethernet                # netio protocols
+NETIO_OBJECTS += arp ethernet ip             # netio protocols
 
 
 MAKEFLAGS += -rR --no-print-directory
