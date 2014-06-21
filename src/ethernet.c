@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "netio/arp.h"
 #include "netio/ethernet.h"
+#include "netio/ip.h"
 #include "netio/raw.h"
 
 
@@ -50,6 +51,9 @@ static int netio_ethernet_chain(netio_context_t *ctx, netio_ethernet_t *cur,
 	switch (cur->neth_type) {
 	case NETIO_ETHERNET_TYPE_ARP:
 		next = NETIO_ARP_PROTOCOL;
+		break;
+	case NETIO_ETHERNET_TYPE_IP:
+		next = NETIO_IP_PROTOCOL;
 		break;
 	default:
 		next = NETIO_RAW_PROTOCOL;
