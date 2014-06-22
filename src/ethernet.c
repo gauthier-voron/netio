@@ -90,12 +90,21 @@ static int netio_ethernet_reply(netio_context_t *ctx, netio_header_t *next,
 				const netio_ethernet_t *req)
 {
 	netio_ethernet_t rep;
+	int type;
 
 	netio_ethernet_init(&rep);
 	netio_header_fill(&rep.neth_header, next);
 
-	netio_ethernet_setsrc(&rep, alloca(sizeof(netio_macaddr_t)));
-	netio_ethernet_setdest(&rep, alloca(sizeof(netio_macaddr_t)));
+	netio_ethernet_setsrc(&rep, netio_ethernet_getdest(req));
+	netio_ethernet_setdest(&rep, netio_ethernet_getsrc(req));
+
+	if (next->nh_protocol == NETIO_ARP_PROTOCOL)
+		type = NETIO_ETHERNET_TYPE_ARP;
+	else if (next->nh_protocol == NETIO_IP_PROTOCOL)
+		type = NETIO_ETHERNET_TYPE_IP;
+	else
+		type = netio_ethernet_gettype(req);
+	netio_ethernet_settype(&rep, type);
 
 	return ctx->nc_at_reply(ctx, &rep.neth_header, &req->neth_header);
 }

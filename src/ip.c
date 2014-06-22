@@ -137,8 +137,19 @@ static int netio_ip_reply(netio_context_t *ctx, netio_header_t *next,
 	netio_ip_init(&rep);
 	netio_header_fill(&rep.nip_header, next);
 
-	netio_ip_setsrc(&rep, alloca(sizeof(netio_ipaddr_t)));
-	netio_ip_setdest(&rep, alloca(sizeof(netio_ipaddr_t)));
+	netio_ip_setversion(&rep, netio_ip_getversion(req));
+	netio_ip_setihl(&rep, netio_ip_getihl(req));
+	netio_ip_settos(&rep, netio_ip_gettos(req));
+	netio_ip_setlen(&rep, netio_ip_getlen(req));
+	netio_ip_setid(&rep, netio_ip_getid(req));
+	netio_ip_setflags(&rep, netio_ip_getflags(req));
+	netio_ip_setoff(&rep, netio_ip_getoff(req));
+	netio_ip_setttl(&rep, netio_ip_getttl(req));
+	netio_ip_setproto(&rep, netio_ip_getproto(req));
+	netio_ip_setsum(&rep, netio_ip_getsum(req));
+
+	netio_ip_setsrc(&rep, netio_ip_getdest(req));
+	netio_ip_setdest(&rep, netio_ip_getsrc(req));
 
 	return ctx->nc_at_reply(ctx, &rep.nip_header, &req->nip_header);
 }

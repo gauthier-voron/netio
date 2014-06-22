@@ -133,14 +133,33 @@ static int netio_arp_reply(netio_context_t *ctx, netio_header_t *next,
 			   const netio_arp_t *req)
 {
 	netio_arp_t rep;
+	int op;
 
 	netio_arp_init(&rep);
 	netio_header_fill(&rep.narp_header, next);
 
-	netio_arp_setsha(&rep, alloca(netio_arp_gethln(req)));
-	netio_arp_setspa(&rep, alloca(netio_arp_getpln(req)));
-	netio_arp_settha(&rep, alloca(netio_arp_gethln(req)));
-	netio_arp_settpa(&rep, alloca(netio_arp_getpln(req)));
+	netio_arp_sethrd(&rep, netio_arp_gethrd(req));
+	netio_arp_setpro(&rep, netio_arp_getpro(req));
+	netio_arp_sethln(&rep, netio_arp_gethln(req));
+	netio_arp_setpln(&rep, netio_arp_getpln(req));
+
+	switch (netio_arp_getop(req)) {
+	case NETIO_ARP_OP_REQUEST:
+		op = NETIO_ARP_OP_REPLY;
+		break;
+	case NETIO_ARP_OP_REPLY:
+		op = NETIO_ARP_OP_REQUEST;
+		break;
+	default:
+		op = netio_arp_getop(req);
+		break;
+	}
+	netio_arp_setop(&rep, op);
+
+	netio_arp_setsha(&rep, netio_arp_gettha(req));
+	netio_arp_setspa(&rep, netio_arp_gettpa(req));
+	netio_arp_settha(&rep, netio_arp_getsha(req));
+	netio_arp_settpa(&rep, netio_arp_getspa(req));
 
 	return ctx->nc_at_reply(ctx, &rep.narp_header, &req->narp_header);
 }
