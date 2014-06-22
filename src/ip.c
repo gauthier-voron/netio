@@ -134,18 +134,25 @@ static int netio_ip_reply(netio_context_t *ctx, netio_header_t *next,
 			  const netio_ip_t *req)
 {
 	netio_ip_t rep;
+	size_t len = (uint16_t) -1;
+	int ret;
 
 	netio_ip_init(&rep);
 	netio_header_fill(&rep.nip_header, next);
 
+	ret = ctx->nc_at_repack(ctx, next, NULL, &len);
+	if (ret)
+		return ret;
+	len = ((uint16_t) -1) - len;
+
 	netio_ip_setversion(&rep, NETIO_IP_VERSION_IPV4);
 	netio_ip_setihl(&rep, sizeof(struct __ip) / sizeof(uint32_t));
+	netio_ip_setlen(&rep, len + netio_ip_getihl(&rep) * sizeof(uint32_t));
 	netio_ip_setttl(&rep, NETIO_IP_TTL_DEFAULT);
 	netio_ip_setsrc(&rep, netio_ip_getdest(req));
 	netio_ip_setdest(&rep, netio_ip_getsrc(req));
 
 	netio_ip_settos(&rep, netio_ip_gettos(req));
-	netio_ip_setlen(&rep, netio_ip_getlen(req));
 	netio_ip_setid(&rep, netio_ip_getid(req));
 	netio_ip_setflags(&rep, netio_ip_getflags(req));
 	netio_ip_setoff(&rep, netio_ip_getoff(req));
