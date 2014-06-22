@@ -20,8 +20,8 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 	return cur->nh_protocol->np_chain(ctx, cur, data, size);
 }
 
-static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
-			  const char *data, size_t size)
+static int user_at_unpack2(netio_context_t *ctx, netio_header_t *cur,
+			   const char *data, size_t size)
 {
 	netio_context_t context;
 	netio_packet_t packet;

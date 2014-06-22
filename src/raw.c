@@ -129,11 +129,12 @@ static int netio_raw_repack(netio_context_t *ctx, const netio_raw_t *cur,
 		*size = 0;
 		return -1;
 	}
-
-	memcpy(data, netio_raw_getdata(cur), rsize);
-
 	*size -= rsize;
-	data += rsize;
+
+	if (data) {
+		memcpy(data, netio_raw_getdata(cur), rsize);
+		data += rsize;
+	}
 
 	return ctx->nc_at_repack(ctx, cur->nraw_header.nh_next, data, size);
 }

@@ -165,24 +165,26 @@ static int netio_ip_repack(netio_context_t *ctx, const netio_ip_t *cur,
 		*size = 0;
 		return -1;
 	}
-
-	__ip = (struct __ip *) data;
-	__ip->version_ihl = ((netio_ip_getversion(cur) & 0xf) << 4)
-		| (netio_ip_getihl(cur) & 0xf);
-	__ip->tos = netio_ip_gettos(cur);
-	__ip->len = htons(netio_ip_getlen(cur));
-	__ip->id = htons(netio_ip_getid(cur));
-	__ip->flags_off = htons(((netio_ip_getflags(cur) & 0x7) << 13)
-				| (netio_ip_getoff(cur) & 0x1fff));
-	__ip->ttl = netio_ip_getttl(cur);
-	__ip->proto = netio_ip_getproto(cur);
-	__ip->sum = htons(netio_ip_getsum(cur));
-
-	netio_ipaddr_toarr(netio_ip_getsrc(cur), (char *) __ip->src);
-	netio_ipaddr_toarr(netio_ip_getdest(cur), (char *) __ip->dest);
-
-	data += (netio_ip_getihl(cur) * sizeof(uint32_t));
 	*size -= (netio_ip_getihl(cur) * sizeof(uint32_t));
+
+	if (data) {
+		__ip = (struct __ip *) data;
+		__ip->version_ihl = ((netio_ip_getversion(cur) & 0xf) << 4)
+			| (netio_ip_getihl(cur) & 0xf);
+		__ip->tos = netio_ip_gettos(cur);
+		__ip->len = htons(netio_ip_getlen(cur));
+		__ip->id = htons(netio_ip_getid(cur));
+		__ip->flags_off = htons(((netio_ip_getflags(cur) & 0x7) << 13)
+					| (netio_ip_getoff(cur) & 0x1fff));
+		__ip->ttl = netio_ip_getttl(cur);
+		__ip->proto = netio_ip_getproto(cur);
+		__ip->sum = htons(netio_ip_getsum(cur));
+
+		netio_ipaddr_toarr(netio_ip_getsrc(cur), (char *) __ip->src);
+		netio_ipaddr_toarr(netio_ip_getdest(cur), (char *) __ip->dest);
+
+		data += (netio_ip_getihl(cur) * sizeof(uint32_t));
+	}
 
 	return ctx->nc_at_repack(ctx, cur->nip_header.nh_next, data, size);
 }

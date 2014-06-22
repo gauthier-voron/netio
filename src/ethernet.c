@@ -119,14 +119,18 @@ static int netio_ethernet_repack(netio_context_t *ctx,
 		*size = 0;
 		return -1;
 	}
-
-	__eth = (struct __ethernet *) data;
-	netio_macaddr_toarr(netio_ethernet_getdest(cur), (char *) __eth->dest);
-	netio_macaddr_toarr(netio_ethernet_getsrc(cur), (char *) __eth->src);
-	__eth->type = htons(netio_ethernet_gettype(cur));
-
-	data += sizeof(*__eth);
 	*size -= sizeof(*__eth);
+
+	if (data) {
+		__eth = (struct __ethernet *) data;
+		netio_macaddr_toarr(netio_ethernet_getdest(cur),
+				    (char *) __eth->dest);
+		netio_macaddr_toarr(netio_ethernet_getsrc(cur),
+				    (char *) __eth->src);
+		__eth->type = htons(netio_ethernet_gettype(cur));
+
+		data += sizeof(*__eth);
+	}
 
 	return ctx->nc_at_repack(ctx, cur->neth_header.nh_next, data, size);
 }

@@ -175,27 +175,31 @@ static int netio_arp_repack(netio_context_t *ctx, const netio_arp_t *cur,
 		*size = 0;
 		return -1;
 	}
-
-	__arp = (struct __arp *) data;
-	__arp->hrd = htons(netio_arp_gethrd(cur));
-	__arp->pro = htons(netio_arp_getpro(cur));
-	__arp->hln = hln;
-	__arp->pln = pln;
-	__arp->op = htons(netio_arp_getop(cur));
-	data += sizeof(*__arp);
-
-	if (netio_arp_gethrd(cur) == NETIO_ARP_HRD_ETHERNET) {
-		netio_macaddr_toarr(netio_arp_getsha(cur), data);
-		netio_macaddr_toarr(netio_arp_gettha(cur), data + hln+pln);
-	}
-
-	if (netio_arp_getpro(cur) == NETIO_ARP_PRO_IP) {
-		netio_ipaddr_toarr(netio_arp_getspa(cur), data + hln);
-		netio_ipaddr_toarr(netio_arp_gettpa(cur), data + hln+pln+hln);
-	}
-
-	data += hln * 2 + pln * 2;
 	*size -= (sizeof(*__arp) + hln * 2 + pln * 2);
+
+	if (data) {
+		__arp = (struct __arp *) data;
+		__arp->hrd = htons(netio_arp_gethrd(cur));
+		__arp->pro = htons(netio_arp_getpro(cur));
+		__arp->hln = hln;
+		__arp->pln = pln;
+		__arp->op = htons(netio_arp_getop(cur));
+		data += sizeof(*__arp);
+
+		if (netio_arp_gethrd(cur) == NETIO_ARP_HRD_ETHERNET) {
+			netio_macaddr_toarr(netio_arp_getsha(cur), data);
+			netio_macaddr_toarr(netio_arp_gettha(cur), data
+					    + hln + pln);
+		}
+
+		if (netio_arp_getpro(cur) == NETIO_ARP_PRO_IP) {
+			netio_ipaddr_toarr(netio_arp_getspa(cur), data + hln);
+			netio_ipaddr_toarr(netio_arp_gettpa(cur), data
+					   + hln + pln + hln);
+		}
+
+		data += hln * 2 + pln * 2;
+	}
 
 	return ctx->nc_at_repack(ctx, cur->narp_header.nh_next, data, size);
 }
