@@ -164,12 +164,49 @@ static int netio_arp_reply(netio_context_t *ctx, netio_header_t *next,
 	return ctx->nc_at_reply(ctx, &rep.narp_header, &req->narp_header);
 }
 
+static int netio_arp_repack(netio_context_t *ctx, const netio_arp_t *cur,
+			    char *data, size_t *size)
+{
+	struct __arp *__arp;
+	size_t hln = netio_arp_gethln(cur);
+	size_t pln = netio_arp_getpln(cur);
+
+	if (*size < (sizeof(*__arp) + hln * 2 + pln * 2)) {
+		*size = 0;
+		return -1;
+	}
+
+	__arp = (struct __arp *) data;
+	__arp->hrd = htons(netio_arp_gethrd(cur));
+	__arp->pro = htons(netio_arp_getpro(cur));
+	__arp->hln = hln;
+	__arp->pln = pln;
+	__arp->op = htons(netio_arp_getop(cur));
+	data += sizeof(*__arp);
+
+	if (netio_arp_gethrd(cur) == NETIO_ARP_HRD_ETHERNET) {
+		netio_macaddr_toarr(netio_arp_getsha(cur), data);
+		netio_macaddr_toarr(netio_arp_gettha(cur), data + hln+pln);
+	}
+
+	if (netio_arp_getpro(cur) == NETIO_ARP_PRO_IP) {
+		netio_ipaddr_toarr(netio_arp_getspa(cur), data + hln);
+		netio_ipaddr_toarr(netio_arp_gettpa(cur), data + hln+pln+hln);
+	}
+
+	data += hln * 2 + pln * 2;
+	*size -= (sizeof(*__arp) + hln * 2 + pln * 2);
+
+	return ctx->nc_at_repack(ctx, cur->narp_header.nh_next, data, size);
+}
+
 
 netio_protocol_t __NETIO_ARP_PROTOCOL = {
 	(netio_unpack_t) netio_arp_unpack,
 	(netio_chain_t)  netio_arp_chain,
 	(netio_print_t)  netio_arp_print,
-	(netio_reply_t)  netio_arp_reply
+	(netio_reply_t)  netio_arp_reply,
+	(netio_repack_t) netio_arp_repack
 };
 
 netio_protocol_t *NETIO_ARP_PROTOCOL = &__NETIO_ARP_PROTOCOL;

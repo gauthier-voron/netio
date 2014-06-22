@@ -53,7 +53,8 @@ netio_protocol_t __NETIO_DEVICE_PROTOCOL = {
 	(netio_unpack_t) NULL,
 	(netio_chain_t)  netio_dev_chain,
 	(netio_print_t)  netio_dev_print,
-	(netio_reply_t)  netio_dev_reply
+	(netio_reply_t)  netio_dev_reply,
+	(netio_repack_t) NULL
 };
 
 netio_protocol_t *NETIO_DEVICE_PROTOCOL = &__NETIO_DEVICE_PROTOCOL;

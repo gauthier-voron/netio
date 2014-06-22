@@ -51,6 +51,9 @@ typedef int (*netio_print_t)(netio_context_t *ctx, FILE *f,
 typedef int (*netio_reply_t)(netio_context_t *ctx, netio_header_t *next,
 			     const netio_header_t *req);
 
+typedef int (*netio_repack_t)(netio_context_t *ctx, const netio_header_t *cur,
+			      char *data, size_t *size);
+
 
 struct netio_protocol
 {
@@ -58,6 +61,7 @@ struct netio_protocol
 	netio_chain_t   np_chain;
 	netio_print_t   np_print;
 	netio_reply_t   np_reply;
+	netio_repack_t  np_repack;
 };
 
 

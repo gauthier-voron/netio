@@ -20,6 +20,31 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 	return cur->nh_protocol->np_chain(ctx, cur, data, size);
 }
 
+static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
+			  const char *data, size_t size)
+{
+	netio_context_t context;
+	netio_packet_t packet;
+	int ret;
+
+	if (data == NULL) {
+		printf("===== original =====\n");
+		ret = netio_context_print(ctx, stdout, cur->nh_head);
+		if (ret)
+			return ret;
+
+		netio_context_repack(ctx, &packet, cur->nh_head);
+
+		netio_context_init(&context);
+		netio_context_setatunpack(&context, user_at_unpack);
+		printf("=====   copy   =====\n");
+		netio_context_unpack(&context, &packet);
+		printf("size = %lu\n", packet.np_size);
+	}
+
+	return cur->nh_protocol->np_chain(ctx, cur, data, size);
+}
+
 
 int main(void)
 {
@@ -27,7 +52,7 @@ int main(void)
 	netio_packet_t packet;
 
 	netio_context_init(&context);
-	netio_context_setatunpack(&context, user_at_unpack);
+	netio_context_setatunpack(&context, user_at_unpack2);
 
 	while (netio_packet_read(&packet, STDIN_FILENO) != -1)
 		netio_context_unpack(&context, &packet);

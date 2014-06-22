@@ -46,6 +46,17 @@ typedef int (*netio_at_print_t)(netio_context_t *ctx, FILE *f,
 typedef int (*netio_at_reply_t)(netio_context_t *ctx, netio_header_t *rep,
 				const netio_header_t *req);
 
+/*
+ * Context specific post repack handle.
+ * Implementation can be used to perform user related treatment in a given
+ * context right after the repacking.
+ * To continue the repacking normally, implementation should call the repack
+ * function of next->nh_protocol->np_repack
+ */
+typedef int (*netio_at_repack_t)(netio_context_t *ctx,
+				 const netio_header_t *next, char *data,
+				 size_t *size);
+
 
 struct netio_context
 {
@@ -53,6 +64,7 @@ struct netio_context
 	netio_at_chain_t   nc_at_chain;
 	netio_at_print_t   nc_at_print;
 	netio_at_reply_t   nc_at_reply;
+	netio_at_repack_t  nc_at_repack;
 };
 
 
@@ -65,6 +77,9 @@ int netio_context_print(netio_context_t *this, FILE *f,
 
 int netio_context_reply(netio_context_t *this, const netio_header_t *header);
 
+int netio_context_repack(netio_context_t *this, netio_packet_t *packet,
+			 const netio_header_t *header);
+
 
 int netio_context_setatunpack(netio_context_t *this, netio_at_unpack_t handle);
 
@@ -74,6 +89,8 @@ int netio_context_setatprint(netio_context_t *this, netio_at_print_t handle);
 
 int netio_context_setatreply(netio_context_t *this, netio_at_reply_t handle);
 
+int netio_context_setatrepack(netio_context_t *this, netio_at_repack_t handle);
+
 
 netio_at_unpack_t netio_context_getatunpack(const netio_context_t *this);
 
@@ -82,6 +99,8 @@ netio_at_chain_t netio_context_getatchain(const netio_context_t *this);
 netio_at_print_t netio_context_getatprint(const netio_context_t *this);
 
 netio_at_reply_t netio_context_getatreply(const netio_context_t *this);
+
+netio_at_repack_t netio_context_getatrepack(const netio_context_t *this);
 
 
 #endif
