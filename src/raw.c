@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include "netio/raw.h"
 
 
@@ -119,12 +120,32 @@ static int netio_raw_reply(netio_context_t *ctx, netio_header_t *next,
 	return ctx->nc_at_reply(ctx, &rep.nraw_header, &req->nraw_header);
 }
 
+static int netio_raw_repack(netio_context_t *ctx, const netio_raw_t *cur,
+			    char *data, size_t *size)
+{
+	size_t rsize = netio_raw_getsize(cur);
+
+	if (*size < rsize) {
+		*size = 0;
+		return -1;
+	}
+	*size -= rsize;
+
+	if (data) {
+		memcpy(data, netio_raw_getdata(cur), rsize);
+		data += rsize;
+	}
+
+	return ctx->nc_at_repack(ctx, cur->nraw_header.nh_next, data, size);
+}
+
 
 netio_protocol_t __NETIO_RAW_PROTOCOL = {
 	(netio_unpack_t) netio_raw_unpack,
 	(netio_chain_t)  netio_raw_chain,
 	(netio_print_t)  netio_raw_print,
-	(netio_reply_t)  netio_raw_reply
+	(netio_reply_t)  netio_raw_reply,
+	(netio_repack_t) netio_raw_repack
 };
 
 netio_protocol_t *NETIO_RAW_PROTOCOL = &__NETIO_RAW_PROTOCOL;

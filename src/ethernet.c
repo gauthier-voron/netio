@@ -109,12 +109,39 @@ static int netio_ethernet_reply(netio_context_t *ctx, netio_header_t *next,
 	return ctx->nc_at_reply(ctx, &rep.neth_header, &req->neth_header);
 }
 
+static int netio_ethernet_repack(netio_context_t *ctx,
+				 const netio_ethernet_t *cur, char *data,
+				 size_t *size)
+{
+	struct __ethernet *__eth;
+
+	if (*size < sizeof(*__eth)) {
+		*size = 0;
+		return -1;
+	}
+	*size -= sizeof(*__eth);
+
+	if (data) {
+		__eth = (struct __ethernet *) data;
+		netio_macaddr_toarr(netio_ethernet_getdest(cur),
+				    (char *) __eth->dest);
+		netio_macaddr_toarr(netio_ethernet_getsrc(cur),
+				    (char *) __eth->src);
+		__eth->type = htons(netio_ethernet_gettype(cur));
+
+		data += sizeof(*__eth);
+	}
+
+	return ctx->nc_at_repack(ctx, cur->neth_header.nh_next, data, size);
+}
+
 
 netio_protocol_t __NETIO_ETHERNET_PROTOCOL = {
 	(netio_unpack_t) netio_ethernet_unpack,
 	(netio_chain_t)  netio_ethernet_chain,
 	(netio_print_t)  netio_ethernet_print,
-	(netio_reply_t)  netio_ethernet_reply
+	(netio_reply_t)  netio_ethernet_reply,
+	(netio_repack_t) netio_ethernet_repack
 };
 
 netio_protocol_t *NETIO_ETHERNET_PROTOCOL = &__NETIO_ETHERNET_PROTOCOL;
