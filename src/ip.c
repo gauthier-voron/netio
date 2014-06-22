@@ -137,19 +137,20 @@ static int netio_ip_reply(netio_context_t *ctx, netio_header_t *next,
 	netio_ip_init(&rep);
 	netio_header_fill(&rep.nip_header, next);
 
-	netio_ip_setversion(&rep, netio_ip_getversion(req));
-	netio_ip_setihl(&rep, netio_ip_getihl(req));
+	netio_ip_setversion(&rep, NETIO_IP_VERSION_IPV4);
+	netio_ip_setihl(&rep, sizeof(struct __ip) / sizeof(uint32_t));
+	netio_ip_setttl(&rep, NETIO_IP_TTL_DEFAULT);
+	netio_ip_setsrc(&rep, netio_ip_getdest(req));
+	netio_ip_setdest(&rep, netio_ip_getsrc(req));
+
 	netio_ip_settos(&rep, netio_ip_gettos(req));
 	netio_ip_setlen(&rep, netio_ip_getlen(req));
 	netio_ip_setid(&rep, netio_ip_getid(req));
 	netio_ip_setflags(&rep, netio_ip_getflags(req));
 	netio_ip_setoff(&rep, netio_ip_getoff(req));
-	netio_ip_setttl(&rep, netio_ip_getttl(req));
 	netio_ip_setproto(&rep, netio_ip_getproto(req));
-	netio_ip_setsum(&rep, netio_ip_getsum(req));
 
-	netio_ip_setsrc(&rep, netio_ip_getdest(req));
-	netio_ip_setdest(&rep, netio_ip_getsrc(req));
+	netio_ip_setsum(&rep, netio_ip_checksum(&rep));
 
 	return ctx->nc_at_reply(ctx, &rep.nip_header, &req->nip_header);
 }
@@ -182,6 +183,35 @@ int netio_ip_init(netio_ip_t *this)
 	this->nip_dest    = NULL;
 
 	return 0;
+}
+
+
+int netio_ip_checksum(const netio_ip_t *this)
+{
+	struct __ip __ip;
+	uint16_t *arr = (uint16_t *) &__ip;
+	uint32_t sum = 0;
+	size_t i;
+
+	__ip.version_ihl = ((netio_ip_getversion(this) & 0xf) << 4)
+		| (netio_ip_getihl(this) & 0xf);
+	__ip.tos = netio_ip_gettos(this) & 0xff;
+	__ip.len = htons(netio_ip_getlen(this) & 0xffff);
+	__ip.id = htons(netio_ip_getid(this) & 0xffff);
+	__ip.flags_off = htons(((netio_ip_getflags(this) & 0x7) << 13)
+			       | (netio_ip_getoff(this) & 0x1fff));
+	__ip.ttl = netio_ip_getttl(this) & 0xff;
+	__ip.proto = netio_ip_getproto(this) & 0xff;
+	__ip.sum = 0;
+	netio_ipaddr_toarr(netio_ip_getsrc(this), (char *) __ip.src);
+	netio_ipaddr_toarr(netio_ip_getdest(this), (char *) __ip.dest);
+
+	for (i=0; i<(sizeof(__ip) / sizeof(uint16_t)); i++) {
+		sum += ntohs(arr[i]);
+		sum = (sum & 0xffff) + (sum >> 16);
+	}
+
+	return (int) ((~sum) & 0xffff);
 }
 
 
