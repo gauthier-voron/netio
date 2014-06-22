@@ -22,3 +22,17 @@ int netio_header_link(netio_header_t *this, netio_header_t *prev)
 
 	return 0;
 }
+
+int netio_header_fill(netio_header_t *this, netio_header_t *next)
+{
+	this->nh_next = next;
+
+	if (next)
+		next->nh_prev = this;
+	while (next) {
+		next->nh_head = this->nh_head;
+		next = next->nh_next;
+	}
+
+	return 0;
+}

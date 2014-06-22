@@ -14,6 +14,8 @@ typedef struct netio_ip netio_ip_t;
 extern netio_protocol_t *NETIO_IP_PROTOCOL;
 
 
+#define NETIO_IP_VERSION_IPV4    4
+
 #define NETIO_IP_TOS_ROUTINE     0
 #define NETIO_IP_TOS_PRIORITY    1
 #define NETIO_IP_TOS_IMMEDIATE   2
@@ -29,6 +31,8 @@ extern netio_protocol_t *NETIO_IP_PROTOCOL;
 
 #define NETIO_IP_FLAGS_NOFRAG    (1 << 1)
 #define NETIO_IP_FLAGS_MRFRAG    (1 << 2)
+
+#define NETIO_IP_TTL_DEFAULT     64
 
 #define NETIO_IP_PROTO_TCP       0x06
 #define NETIO_IP_PROTO_UDP       0x11
@@ -53,6 +57,9 @@ struct netio_ip
 
 
 int netio_ip_init(netio_ip_t *this);
+
+
+int netio_ip_checksum(const netio_ip_t *this);
 
 
 const char *netio_ip_precealias(int tos);

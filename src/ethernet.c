@@ -86,11 +86,35 @@ static int netio_ethernet_print(netio_context_t *ctx, FILE *f,
 				cur->neth_header.nh_next);
 }
 
+static int netio_ethernet_reply(netio_context_t *ctx, netio_header_t *next,
+				const netio_ethernet_t *req)
+{
+	netio_ethernet_t rep;
+	int type;
+
+	netio_ethernet_init(&rep);
+	netio_header_fill(&rep.neth_header, next);
+
+	netio_ethernet_setsrc(&rep, netio_ethernet_getdest(req));
+	netio_ethernet_setdest(&rep, netio_ethernet_getsrc(req));
+
+	if (next->nh_protocol == NETIO_ARP_PROTOCOL)
+		type = NETIO_ETHERNET_TYPE_ARP;
+	else if (next->nh_protocol == NETIO_IP_PROTOCOL)
+		type = NETIO_ETHERNET_TYPE_IP;
+	else
+		type = netio_ethernet_gettype(req);
+	netio_ethernet_settype(&rep, type);
+
+	return ctx->nc_at_reply(ctx, &rep.neth_header, &req->neth_header);
+}
+
 
 netio_protocol_t __NETIO_ETHERNET_PROTOCOL = {
 	(netio_unpack_t) netio_ethernet_unpack,
 	(netio_chain_t)  netio_ethernet_chain,
-	(netio_print_t)  netio_ethernet_print
+	(netio_print_t)  netio_ethernet_print,
+	(netio_reply_t)  netio_ethernet_reply
 };
 
 netio_protocol_t *NETIO_ETHERNET_PROTOCOL = &__NETIO_ETHERNET_PROTOCOL;

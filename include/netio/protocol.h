@@ -39,12 +39,25 @@ typedef int (*netio_chain_t)(netio_context_t *ctx, netio_header_t *cur,
 typedef int (*netio_print_t)(netio_context_t *ctx, FILE *f,
 			     const netio_header_t *cur);
 
+/*
+ * Protocol specific reply function.
+ * Implementation should:
+ * - compute reply addresses when possible (basing on "req").
+ * - compute every packet length fields since the payloads (in "next") are
+ *   already computed.
+ * - compute every checksum fields.
+ * - not make any assumptions on the packet semantic.
+ */
+typedef int (*netio_reply_t)(netio_context_t *ctx, netio_header_t *next,
+			     const netio_header_t *req);
+
 
 struct netio_protocol
 {
 	netio_unpack_t  np_unpack;
 	netio_chain_t   np_chain;
 	netio_print_t   np_print;
+	netio_reply_t   np_reply;
 };
 
 
