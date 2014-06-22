@@ -99,6 +99,7 @@ static int netio_ip_print(netio_context_t *ctx, FILE *f,
 	fprintf(f, "    %-26s .....%d..\n",
 		netio_ip_relibalias(tmp), (tmp >> 2) & 0x1);
 
+	fprintf(f, "%-30s %d\n", "  total length", netio_ip_getlen(cur));
 	fprintf(f, "%-30s %d\n", "  identification", netio_ip_getid(cur));
 
 	tmp = netio_ip_getflags(cur);
