@@ -5,6 +5,7 @@
 #include "netio/ip.h"
 #include "netio/ipaddr.h"
 #include "netio/raw.h"
+#include "netio/udp.h"
 
 
 struct __ip
@@ -67,9 +68,19 @@ static int netio_ip_chain(netio_context_t *ctx, netio_ip_t *cur,
 {
 	const netio_protocol_t *next = NULL;
 
-	if (size > 0)
-		next = NETIO_RAW_PROTOCOL;
+	if (size == 0)
+		goto ret;
 
+	switch (netio_ip_getproto(cur)) {
+	case NETIO_IP_PROTO_UDP:
+		next = NETIO_UDP_PROTOCOL;
+		break;
+	default:
+		next = NETIO_RAW_PROTOCOL;
+		break;
+	}
+
+ ret:
 	return ctx->nc_at_chain(ctx, &cur->nip_header, data, size, next);
 }
 
