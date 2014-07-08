@@ -65,20 +65,49 @@ static int netio_udp_print(netio_context_t *ctx, FILE *f,
 static int netio_udp_reply(netio_context_t *ctx, netio_header_t *next,
 			   const netio_udp_t *req)
 {
-	if (ctx) {}
-	if (next) {}
-	if (req) {}
-	return -1;
+	netio_udp_t rep;
+	size_t len = (uint16_t) -1;
+	int ret;
+
+	netio_udp_init(&rep);
+	netio_header_fill(&rep.nudp_header, next);
+
+	ret = ctx->nc_at_repack(ctx, next, NULL, &len);
+	if (ret)
+		return ret;
+	len = ((uint16_t) -1) - len;
+
+	netio_udp_setsrc(&rep, netio_udp_getdest(req));
+	netio_udp_setdest(&rep, netio_udp_getsrc(req));
+	netio_udp_setlen(&rep, len);
+
+	netio_udp_setsum(&rep, netio_udp_getsum(req) * 0);
+
+	return ctx->nc_at_reply(ctx, &rep.nudp_header, &req->nudp_header);
 }
 
 static int netio_udp_repack(netio_context_t *ctx, const netio_udp_t *cur,
 			    char *data, size_t *size)
 {
-	if (ctx) {}
-	if (cur) {}
-	if (data) {}
-	if (size) {}
-	return -1;
+	struct __udp *__udp;
+
+	if (*size < sizeof(*__udp)) {
+		*size = 0;
+		return -1;
+	}
+	*size -= sizeof(*__udp);
+
+	if (data) {
+		__udp = (struct __udp *) data;
+		__udp->src = htons(netio_udp_getsrc(cur));
+		__udp->dest = htons(netio_udp_getdest(cur));
+		__udp->len = htons(netio_udp_getlen(cur));
+		__udp->sum = htons(netio_udp_getsum(cur));
+
+		data += sizeof(*__udp);
+	}
+
+	return ctx->nc_at_repack(ctx, cur->nudp_header.nh_next, data, size);
 }
 
 
