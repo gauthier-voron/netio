@@ -26,7 +26,10 @@ struct netio_udp
 int netio_udp_init(netio_udp_t *this);
 
 
-int netio_udp_checksum(const netio_udp_t *this);
+int netio_udp_checksum(const netio_udp_t *this, const netio_ip_t *pseudo,
+		       const char *data, size_t size);
+
+int netio_udp_auto_checksum(const netio_udp_t *this);
 
 
 int netio_udp_setsrc(netio_udp_t *this, int src);
