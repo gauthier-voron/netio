@@ -133,6 +133,26 @@ int netio_device_listifnames(char *buffer, size_t size)
 	return netio_device_putifnames(buffer, size, arr, count);
 }
 
+int netio_device_getifflags(const char *ifname)
+{
+	int fd, ret;
+	struct ifreq ifreq;
+	size_t size = sizeof(ifreq.ifr_name);
+
+	ifreq.ifr_name[size - 1] = '\0';
+	strncpy(ifreq.ifr_name, ifname, size);
+	if (ifreq.ifr_name[size - 1] != '\0')
+		return -1;
+
+	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+		return -1;
+	ret = ioctl(fd, SIOCGIFFLAGS, &ifreq);
+	if (close(fd) != 0 || ret != 0)
+		return -1;
+
+	return ifreq.ifr_flags;
+}
+
 
 int netio_device_setifname(netio_device_t *this, const char *ifname)
 {
