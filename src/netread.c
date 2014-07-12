@@ -2,6 +2,7 @@
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
 #include <net/if.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -12,6 +13,7 @@
 
 
 static int sock = -1;
+static volatile int killed = 0;
 
 
 static void close_sock(void)
@@ -51,19 +53,43 @@ static int netio_packet_netread(netio_packet_t *dest)
 }
 
 
+static void signal_handler(int signum __attribute__((unused)))
+{
+	killed = 1;
+}
+
+static int setup_signal_handler(int signum)
+{
+	struct sigaction sigact;
+
+	sigemptyset(&sigact.sa_mask);
+	sigact.sa_flags = 0;
+	sigact.sa_handler = signal_handler;
+
+	return sigaction(signum, &sigact, NULL);
+}
+
+
 int main(void)
 {
 	netio_packet_t packet;
 
+	if (setup_signal_handler(SIGINT) != 0
+	    || setup_signal_handler(SIGQUIT) != 0
+	    || setup_signal_handler(SIGTERM) != 0)
+		return EXIT_FAILURE;
+
 	if (open_sock() == -1)
 		return EXIT_FAILURE;
 
-	while (1) {
+	while (!killed) {
 		if (netio_packet_netread(&packet) == -1)
-			return EXIT_FAILURE;
+			continue;
 		if (netio_packet_write(&packet, STDOUT_FILENO) == -1)
-			return EXIT_FAILURE;
+			continue;
 	}
+
+	close_sock();
 
 	return EXIT_SUCCESS;
 }
