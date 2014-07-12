@@ -6,6 +6,7 @@ struct netio_device;
 typedef struct netio_device netio_device_t;
 
 
+#include <stdlib.h>
 #include "netio/header.h"
 #include "netio/protocol.h"
 
@@ -21,6 +22,9 @@ struct netio_device
 
 
 int netio_device_init(netio_device_t *this);
+
+
+int netio_device_listifnames(char *buffer, size_t size);
 
 
 int netio_device_setifname(netio_device_t *this, const char *ifname);
