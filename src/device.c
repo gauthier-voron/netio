@@ -133,24 +133,40 @@ int netio_device_listifnames(char *buffer, size_t size)
 	return netio_device_putifnames(buffer, size, arr, count);
 }
 
-int netio_device_getifflags(const char *ifname)
+static int netio_device_ioctlreq(struct ifreq *ifreq, const char *ifname,
+				 int reqtype)
 {
 	int fd, ret;
-	struct ifreq ifreq;
-	size_t size = sizeof(ifreq.ifr_name);
+	size_t size = sizeof(ifreq->ifr_name);
 
-	ifreq.ifr_name[size - 1] = '\0';
-	strncpy(ifreq.ifr_name, ifname, size);
-	if (ifreq.ifr_name[size - 1] != '\0')
+	ifreq->ifr_name[size - 1] = '\0';
+	strncpy(ifreq->ifr_name, ifname, size);
+	if (ifreq->ifr_name[size - 1] != '\0')
 		return -1;
 
 	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 		return -1;
-	ret = ioctl(fd, SIOCGIFFLAGS, &ifreq);
+	ret = ioctl(fd, reqtype, ifreq);
 	if (close(fd) != 0 || ret != 0)
 		return -1;
 
+	return 0;
+}
+
+int netio_device_getifflags(const char *ifname)
+{
+	struct ifreq ifreq;
+	if (netio_device_ioctlreq(&ifreq, ifname, SIOCGIFFLAGS) != 0)
+		return -1;
 	return ifreq.ifr_flags;
+}
+
+int netio_device_getifmtu(const char *ifname)
+{
+	struct ifreq ifreq;
+	if (netio_device_ioctlreq(&ifreq, ifname, SIOCGIFMTU) != 0)
+		return -1;
+	return ifreq.ifr_mtu;
 }
 
 

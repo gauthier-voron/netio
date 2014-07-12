@@ -47,6 +47,8 @@ int netio_device_listifnames(char *buffer, size_t size);
 
 int netio_device_getifflags(const char *ifname);
 
+int netio_device_getifmtu(const char *ifname);
+
 
 int netio_device_setifname(netio_device_t *this, const char *ifname);
 
