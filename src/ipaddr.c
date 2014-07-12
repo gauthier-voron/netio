@@ -1,5 +1,10 @@
+#include <arpa/inet.h>
+#include <net/if.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <unistd.h>
 #include "netio/ipaddr.h"
 
 
@@ -53,6 +58,30 @@ int netio_ipaddr_fromstr(netio_ipaddr_t *this, const char *str)
 int netio_ipaddr_fromarr(netio_ipaddr_t *this, const char *arr)
 {
 	*this = *((netio_ipaddr_t *) arr);
+	return 0;
+}
+
+int netio_ipaddr_fromifn(netio_ipaddr_t *this, const char *ifn)
+{
+	int fd, ret;
+	struct ifreq ifreq;
+	struct sockaddr_in *sin;
+	size_t size = sizeof(ifreq.ifr_name);
+
+	ifreq.ifr_name[size - 1] = '\0';
+	strncpy(ifreq.ifr_name, ifn, size);
+	if (ifreq.ifr_name[size - 1] != '\0')
+		return -1;
+	ifreq.ifr_addr.sa_family = AF_INET;
+
+	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+		return -1;
+	ret = ioctl(fd, SIOCGIFADDR, &ifreq);
+	if (close(fd) != 0 || ret != 0)
+		return -1;
+
+	sin = (struct sockaddr_in *) &ifreq.ifr_addr;
+	*this = *((netio_ipaddr_t *) &sin->sin_addr);
 	return 0;
 }
 
