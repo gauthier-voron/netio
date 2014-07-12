@@ -75,7 +75,7 @@ $(BIN)netread: $(OBJ)netread.o $(OBJ)packet.o | $(BIN)
 	$(call cmd-print,  SETCAP  $@)
 	$(Q)sudo setcap cap_net_raw+ep $@
 
-$(BIN)netwrite: $(OBJ)netwrite.o | $(BIN)
+$(BIN)netwrite: $(OBJ)netwrite.o $(OBJ)packet.o | $(BIN)
 	$(call cmd-print,  LD      $@)
 	$(Q)$(CC) $^ -o $@ $(LDFLAGS)
 	$(call cmd-print,  SETCAP  $@)
