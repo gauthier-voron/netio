@@ -1,5 +1,9 @@
+#include <net/if.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <unistd.h>
 #include "netio/macaddr.h"
 
 
@@ -54,6 +58,27 @@ int netio_macaddr_fromstr(netio_macaddr_t *this, const char *str)
 int netio_macaddr_fromarr(netio_macaddr_t *this, const char *arr)
 {
 	*this = *((netio_macaddr_t *) arr);
+	return 0;
+}
+
+int netio_macaddr_fromifn(netio_macaddr_t *this, const char *ifn)
+{
+	int fd, ret;
+	struct ifreq ifreq;
+	size_t size = sizeof(ifreq.ifr_name);
+
+	ifreq.ifr_name[size - 1] = '\0';
+	strncpy(ifreq.ifr_name, ifn, size);
+	if (ifreq.ifr_name[size - 1] != '\0')
+		return -1;
+
+	if ((fd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
+		return -1;
+	ret = ioctl(fd, SIOCGIFHWADDR, &ifreq);
+	if (close(fd) != 0 || ret != 0)
+		return -1;
+
+	*this = *((netio_macaddr_t *) ifreq.ifr_hwaddr.sa_data);
 	return 0;
 }
 
