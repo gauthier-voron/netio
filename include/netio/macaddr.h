@@ -18,6 +18,8 @@ int netio_macaddr_fromstr(netio_macaddr_t *this, const char *str);
 
 int netio_macaddr_fromarr(netio_macaddr_t *this, const char *arr);
 
+int netio_macaddr_fromifn(netio_macaddr_t *this, const char *ifn);
+
 
 int netio_macaddr_tostr(const netio_macaddr_t *this, char *buf);
 

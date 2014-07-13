@@ -18,6 +18,8 @@ int netio_ipaddr_fromstr(netio_ipaddr_t *this, const char *str);
 
 int netio_ipaddr_fromarr(netio_ipaddr_t *this, const char *arr);
 
+int netio_ipaddr_fromifn(netio_ipaddr_t *this, const char *ifn);
+
 
 int netio_ipaddr_tostr(const netio_ipaddr_t *this, char *buf);
 
