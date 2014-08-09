@@ -111,6 +111,29 @@ install: all installdirs
             cp $$f $(prefix)/usr/share/netio/examples ; \
         done
 
+.PHONY: uninstall
+uninstall:
+	$(call cmd-print,  UNSTALL binaries)
+	$(Q)rm $(prefix)/usr/bin/netread
+	$(Q)rm $(prefix)/usr/bin/netwrite
+	$(call cmd-print,  UNSTALL libraries)
+	$(Q)rm $(prefix)/usr/lib/libnetio.so.*
+	$(call cmd-print,  UNSTALL manpages)
+	$(Q)-for f in $(notdir $(wildcard $(MAN)*.1)) ; do \
+            rm $(prefix)/usr/share/man/man1/$$f.gz ; \
+        done
+	$(Q)-for f in $(notdir $(wildcard $(MAN)*.3)) ; do \
+            rm $(prefix)/usr/share/man/man3/$$f.gz ; \
+        done
+	$(Q)-for f in $(notdir $(wildcard $(MAN)*.7)) ; do \
+            rm $(prefix)/usr/share/man/man7/$$f.gz ; \
+        done
+	$(call cmd-print,  UNSTALL examples)
+	$(Q)-rm -rf $(prefix)/usr/share/netio/examples
+	$(Q)-rm -rf $(prefix)/usr/share/netio/bin
+	$(call cmd-print,  UNSTALL directories)
+	$(Q)-rm -rf $(prefix)/usr/share/netio
+
 
 $(OBJ) $(LIB) $(BIN):
 	$(call cmd-print,  MKDIR   $@)
