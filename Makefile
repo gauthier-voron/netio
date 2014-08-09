@@ -4,6 +4,7 @@ OBJ := obj/
 BIN := bin/
 LIB := lib/
 MAN := man/
+EXP := examples/
 
 V ?= 1
 
@@ -108,11 +109,11 @@ $(OBJ)%.so:
 clean:
 	$(call cmd-print,  CLEAN)
 	-$(Q)rm -rf $(OBJ) $(BIN) $(LIB) *~ $(SRC)*~ $(INC)*~ $(INC)netio/*~
-	-$(Q)rm -rf $(MAN)*~
+	-$(Q)rm -rf $(EXP)*~ $(MAN)*~
 	-$(Q)rm -rf .depends
 
 
-.depends: $(wildcard $(SRC)*.c)
+.depends: $(wildcard $(SRC)*.c $(EXP)*.c)
 	$(call cmd-print,  MKDEP   $@)
 	$(Q)$(CC) -MM -I$(INC) $^ | sed -r \
           -e 's/^([[:alnum:]_.]+)\.o/$$(OBJ)\1.o $$(OBJ)\1.so/' \
