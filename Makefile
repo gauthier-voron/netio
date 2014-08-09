@@ -14,7 +14,7 @@ FIX-VERSION  :=0
 VERSION      :=$(MAJOR-VERSION).$(MINOR-VERSION).$(FIX-VERSION)
 
 CC      := gcc
-CCFLAGS := -Wall -Wextra -pedantic -Werror
+CCFLAGS := -Wall -Wextra -pedantic -Werror -g
 CSFLAGS := -fPIC -DNETIO_VERSION=\"$(VERSION)\"
 LDFLAGS := 
 LSFLAGS := -shared
