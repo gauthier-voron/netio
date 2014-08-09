@@ -26,4 +26,7 @@ int netio_ipaddr_tostr(const netio_ipaddr_t *this, char *buf);
 int netio_ipaddr_toarr(const netio_ipaddr_t *this, char *arr);
 
 
+int netio_ipaddr_cmp(const netio_ipaddr_t *a, const netio_ipaddr_t *b);
+
+
 #endif
