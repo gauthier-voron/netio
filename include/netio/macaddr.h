@@ -26,4 +26,7 @@ int netio_macaddr_tostr(const netio_macaddr_t *this, char *buf);
 int netio_macaddr_toarr(const netio_macaddr_t *this, char *arr);
 
 
+int netio_macaddr_cmp(const netio_macaddr_t *a, const netio_macaddr_t *b);
+
+
 #endif
