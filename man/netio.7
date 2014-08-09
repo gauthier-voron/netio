@@ -1,0 +1,101 @@
+.TH NETIO 7 2014-08-09 Linux "Linux Programmer's Manual"
+.SH NAME
+netio \- Low level network input / output
+.SH DESCRIPTION
+The Netio library defines a set of interface to easily manipulate network
+packets at a low level, by capturing, modifying or injecting them.
+The interface is designed to separate the syntaxic aspect of the network
+protocols, which is fully handled by the library and the semantic aspect, which
+has some default handling in the library, the user can overwrite.
+.SS "Software architecture"
+Because capturing and injecting packets at low level is privilegied operations,
+but parsing and modifying them is not, a typical software architecture for a
+program using Netio is the following:
+.IP \- 3
+A first privilegied program captures packets at low level and print them in its
+standard output. This program is provided with the library (netread).
+.IP \- 3
+The output is piped in a non-privilegied program which can parse and
+manipulate them or create new ones with the help of the Netio library, and
+finally print resulting packets on its standard output.
+.IP \- 3
+A second privilegied program reads packets on its standard input (which is
+piped from the non-privilegied program) and injects them. This program is
+provided with the library (netwrite).
+.IP "" 0
+Nontheless, this architecture separate privilegied, small and library defined
+programs from potentially big, user written, unprivilegied ones, but it also
+allows to store packets for future processing, make a pipeline of several
+user programs etc... allowing great flexibility.
+.SS "Library architecture"
+The library is object oriented and uses a pipeline data flow style to avoid
+using the heap, improving safety. Thus, the typical use of the library is to
+define some callback hooks for the pipeline, then send the data in the
+pipeline to be processed.
+The library bases on four core classes:
+.IP \- 3
+.B netio_context_t
+is the class of objects controlling the pipeline. There are several kind of
+pipeline, for instance, the
+.BR netio_context_unpack ()
+pipeline accepts a network packet and
+parses it into several protocol specific headers, more easy to use. Each
+pipeline can be launched by a method of a
+.B netio_context_t
+object. A pipeline does not return anything else than an exit code. The data
+produced by the pipeline is available throught hooks which can be set by the
+user with oher methods of a
+.BR netio_context_t .
+.IP \- 3
+.B netio_packet_t
+is the class of packed, just received or ready to send network packets. The
+privilegied programs read and write objetcs of this class on their standard
+input / output.
+.IP \- 3
+.B netio_protocol_t
+is the class of protocol specific operations. Actually, it is just a completely
+abstract class (Java interface) defining methods than every protocol should
+provide to allow pipelines working correctly.
+.IP \- 3
+.B netio_header_t
+is the base class of protocol specific headers. These objects contains a
+reference on the underlying
+.B netio_protocol_t
+and also on containing headers (container), contained headers (payload) and
+base header (outermost container).
+Their can be safely casted into protocol specific headers.
+.SS "Naming conventions"
+The library classes and methods follow the given naming convention. Each public
+symbol (function, typedef, global variable) is prefixed with
+.BR netio_
+with the exception for the macros where the prefix is in upper case
+.BR NETIO_ .
+
+Classe structures are encapsulated with a typedef in the form
+.BI netio_ class _t
+where the class should be a single word. For protocol specific header, it
+should be the complete name of the protocol, or its acronym if the protocol has
+a composed name
+.RB ( netio_ethernet_t
+instead of
+.BR netio_eth_t ,
+and
+.B netio_ip_t
+instead of
+.BR netio_internel_protocol_t ).
+
+Methods are prefixed with the class name (without the trailing
+.BR _t )
+following the pattern
+.BI netio_ class _ method \fR()
+where the method name should consist in a single short token, with no
+underscore
+.RB ( netio_context_setatunpack ()
+instead of
+.BR netio_context_set_at_unpack ()).
+Also, methods should always take the object itself as first argument.
+
+.SH SEE ALSO
+.BR netread (1),
+.BR netwrite (1),
+.BR netprint (1)

@@ -3,6 +3,7 @@ INC := include/
 OBJ := obj/
 BIN := bin/
 LIB := lib/
+MAN := man/
 
 V ?= 1
 
@@ -107,6 +108,7 @@ $(OBJ)%.so:
 clean:
 	$(call cmd-print,  CLEAN)
 	-$(Q)rm -rf $(OBJ) $(BIN) $(LIB) *~ $(SRC)*~ $(INC)*~ $(INC)netio/*~
+	-$(Q)rm -rf $(MAN)*~
 	-$(Q)rm -rf .depends
 
 
