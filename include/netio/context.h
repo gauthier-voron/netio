@@ -103,4 +103,22 @@ netio_at_reply_t netio_context_getatreply(const netio_context_t *this);
 netio_at_repack_t netio_context_getatrepack(const netio_context_t *this);
 
 
+int netio_context_atunpack(netio_context_t *ctx, netio_header_t *cur,
+			   const char *payload, size_t size);
+
+int netio_context_atchain(netio_context_t *ctx, netio_header_t *prev,
+			  const char *payload, size_t size,
+			  const netio_protocol_t *next);
+
+int netio_context_atprint(netio_context_t *ctx, FILE *f,
+			  const netio_header_t *prev,
+			  const netio_header_t *next);
+
+int netio_context_atreply(netio_context_t *ctx, netio_header_t *rep,
+			  const netio_header_t *req);
+
+int netio_context_atrepack(netio_context_t *ctx, const netio_header_t *next,
+			   char *data, size_t *size);
+
+
 #endif
