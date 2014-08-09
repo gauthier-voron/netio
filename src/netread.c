@@ -3,6 +3,7 @@
 #include <linux/if_packet.h>
 #include <net/if.h>
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -70,9 +71,53 @@ static int setup_signal_handler(int signum)
 }
 
 
-int main(void)
+static void invocation_error(const char *program)
+{
+	fprintf(stderr, "%s: invocation error\n", program);
+	fprintf(stderr, "pease run '%s --help' for more informations\n",
+		program);
+}
+
+static void version(void)
+{
+	printf("%s\n", VERSION);
+}
+
+static void usage(void)
+{
+	printf("usage: netread [-v | --version]      print the version number "
+	       "and exit\n"
+	       "       netread [-h | -? | --help]    print this help message "
+	       "and exit\n"
+	       "       netread                       capture the network "
+	       "packets\n\n");
+	printf("The netread program is used to capture and dump on its "
+	       "standard output, the\n"
+	       "network packets at a low level. To work properly, this "
+	       "program needs to be run\n"
+	       "as root or with the cap_net_raw capability. The capture stops "
+	       "when receiving an\n"
+	       "INT, QUIT or TERM signal.\n");
+}
+
+
+int main(int argc, const char **argv)
 {
 	netio_packet_t packet;
+
+	if (argc >= 2) {
+		if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--version")) {
+			version();
+			return EXIT_SUCCESS;
+		} else if (!strcmp(argv[1], "-h") || !strcmp(argv[1], "-?")
+			   || !strcmp(argv[1], "--help")) {
+			usage();
+			return EXIT_SUCCESS;
+		} else {
+			invocation_error(argv[0]);
+			return EXIT_FAILURE;
+		}
+	}
 
 	if (setup_signal_handler(SIGINT) != 0
 	    || setup_signal_handler(SIGQUIT) != 0
