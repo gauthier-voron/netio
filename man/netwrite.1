@@ -1,0 +1,23 @@
+.TH NETWRITE 1 2014-08-09 GNU "Linux Programmer's Manual"
+.SH NAME
+netwrite \- network packet injection of Netio library
+.SH SYNOPSIS
+.B netwrite
+.SH DESCRIPTION
+.IR Netwrite
+reads its standard input to get packed network packets it then injects on the
+network at low level, until it receives a
+.BR INT ,
+.BR QUIT ,
+or
+.BR TERM
+signal.
+This program should have the
+.BR cap_net_raw
+capability and does not require to be launched by root.
+.SH RETURN VALUE
+.IR Netwrite
+returns 0 on success and 1 in case of error.
+.SH SEE ALSO
+.BR netio (7),
+.BR netread (1)
