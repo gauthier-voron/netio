@@ -49,7 +49,7 @@ _FORCE:
 else
 
 
-default: check
+default: all
 
 
 ifeq ($(mode),build)
@@ -60,10 +60,6 @@ endif
 .PHONY: all examples
 all: $(LIB)libnetio.so $(BIN)netread $(BIN)netwrite
 examples: $(BIN)netread $(BIN)netwrite $(BIN)netprint
-
-.PHONY: check
-check: $(BIN)netread $(BIN)netprint
-	./$(BIN)netread | ./$(BIN)netprint
 
 
 .PHONY: installdirs
