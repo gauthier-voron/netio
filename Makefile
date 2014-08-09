@@ -66,6 +66,52 @@ check: $(BIN)netread $(BIN)netprint
 	./$(BIN)netread | ./$(BIN)netprint
 
 
+.PHONY: installdirs
+installdirs:
+	$(call cmd-print,  INSTALL directories)
+	$(Q)mkdir -p $(prefix)/usr/lib
+	$(Q)mkdir -p $(prefix)/usr/bin
+	$(Q)-mkdir -p $(prefix)/usr/share/man/man1
+	$(Q)-mkdir -p $(prefix)/usr/share/man/man3
+	$(Q)-mkdir -p $(prefix)/usr/share/man/man7
+	$(Q)-mkdir -p $(prefix)/usr/share/netio/bin
+	$(Q)-mkdir -p $(prefix)/usr/share/netio/examples
+
+.PHONY: install
+install: all installdirs
+	$(call cmd-print,  INSTALL binaries)
+	$(Q)cp $(BIN)netread $(prefix)/usr/bin/netread
+	$(Q)-setcap cap_net_raw+ep $(prefix)/usr/bin/netread \
+          || echo "warning: netread will need to be run as root"
+	$(Q)cp $(BIN)netwrite $(prefix)/usr/bin/netwrite
+	$(Q)-setcap cap_net_raw+ep $(prefix)/usr/bin/netwrite \
+          || echo "warning: netwrite will need to be run as root"
+	$(call cmd-print,  INSTALL libraries)
+	$(Q)cp $(LIB)libnetio.so.$(VERSION) $(prefix)/usr/lib
+	$(Q)-rm $(prefix)/usr/lib/libnetio.so.$(MAJOR-VERSION) \
+          2>/dev/null || true
+	$(Q)ln -s libnetio.so.$(VERSION) \
+              $(prefix)/usr/lib/libnetio.so.$(MAJOR-VERSION)
+	$(call cmd-print,  INSTALL manpages)
+	$(Q)-for f in $(notdir $(wildcard $(MAN)*.1)) ; do \
+            gzip -c $(MAN)$$f > $(prefix)/usr/share/man/man1/$$f.gz ; \
+        done
+	$(Q)-for f in $(notdir $(wildcard $(MAN)*.3)) ; do \
+            gzip -c $(MAN)$$f > $(prefix)/usr/share/man/man3/$$f.gz ; \
+        done
+	$(Q)-for f in $(notdir $(wildcard $(MAN)*.7)) ; do \
+            gzip -c $(MAN)$$f > $(prefix)/usr/share/man/man7/$$f.gz ; \
+        done
+	$(call cmd-print,  INSTALL examples)
+	$(Q)-for f in $(filter-out $(BIN)netread $(BIN)netwrite, \
+          $(wildcard $(BIN)*)) ; do \
+            cp $$f $(prefix)/usr/share/netio/bin ; \
+        done
+	$(Q)-for f in $(wildcard $(EXP)*) ; do \
+            cp $$f $(prefix)/usr/share/netio/examples ; \
+        done
+
+
 $(OBJ) $(LIB) $(BIN):
 	$(call cmd-print,  MKDIR   $@)
 	$(Q)mkdir $@
@@ -74,14 +120,10 @@ $(OBJ) $(LIB) $(BIN):
 $(BIN)netread: $(OBJ)netread.o $(OBJ)packet.o | $(BIN)
 	$(call cmd-print,  LD      $@)
 	$(Q)$(CC) $^ -o $@ $(LDFLAGS)
-	$(call cmd-print,  SETCAP  $@)
-	$(Q)sudo setcap cap_net_raw+ep $@
 
 $(BIN)netwrite: $(OBJ)netwrite.o $(OBJ)packet.o | $(BIN)
 	$(call cmd-print,  LD      $@)
 	$(Q)$(CC) $^ -o $@ $(LDFLAGS)
-	$(call cmd-print,  SETCAP  $@)
-	$(Q)sudo setcap cap_net_raw+ep $@
 
 $(BIN)netprint: $(OBJ)netprint.o $(LIB)libnetio.so | $(BIN)
 	$(call cmd-print,  LD      $@)
