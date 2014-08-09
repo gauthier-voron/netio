@@ -97,3 +97,9 @@ int netio_macaddr_toarr(const netio_macaddr_t *this, char *arr)
 	*((netio_macaddr_t *) arr) = *this;
 	return 0;
 }
+
+
+int netio_macaddr_cmp(const netio_macaddr_t *a, const netio_macaddr_t *b)
+{
+	return memcmp(a->nmac_arr, b->nmac_arr, sizeof(a->nmac_arr));
+}

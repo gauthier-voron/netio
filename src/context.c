@@ -4,42 +4,40 @@
 #include "netio/raw.h"
 
 
-static int netio_context_at_unpack(netio_context_t *ctx, netio_header_t *cur,
-				   const char *payload, size_t size)
+int netio_context_atunpack(netio_context_t *ctx, netio_header_t *cur,
+			   const char *payload, size_t size)
 {
 	return cur->nh_protocol->np_chain(ctx, cur, payload, size);
 }
 
-static int netio_context_at_chain(netio_context_t *ctx, netio_header_t *prev,
-				  const char *payload, size_t size,
-				  const netio_protocol_t *next)
+int netio_context_atchain(netio_context_t *ctx, netio_header_t *prev,
+			  const char *payload, size_t size,
+			  const netio_protocol_t *next)
 {
 	if (!next)
 		return 0;
 	return next->np_unpack(ctx, prev, payload, size);
 }
 
-static int netio_context_at_print(netio_context_t *ctx, FILE *f,
-				  const netio_header_t *prev
-				  __attribute__((unused)),
-				  const netio_header_t *next)
+int netio_context_atprint(netio_context_t *ctx, FILE *f,
+			  const netio_header_t *prev __attribute__((unused)),
+			  const netio_header_t *next)
 {
 	if (!next)
 		return 0;
 	return next->nh_protocol->np_print(ctx, f, next);
 }
 
-static int netio_context_at_reply(netio_context_t *ctx, netio_header_t *rep,
-				  const netio_header_t *req)
+int netio_context_atreply(netio_context_t *ctx, netio_header_t *rep,
+			  const netio_header_t *req)
 {
 	if (!req->nh_prev)
 		return 0;
 	return req->nh_prev->nh_protocol->np_reply(ctx, rep, req->nh_prev);
 }
 
-static int netio_context_at_repack(netio_context_t *ctx,
-				   const netio_header_t *next, char *data,
-				   size_t *size)
+int netio_context_atrepack(netio_context_t *ctx, const netio_header_t *next,
+			   char *data, size_t *size)
 {
 	if (!next)
 		return 0;
@@ -49,11 +47,11 @@ static int netio_context_at_repack(netio_context_t *ctx,
 
 int netio_context_init(netio_context_t *ctx)
 {
-	ctx->nc_at_unpack = netio_context_at_unpack;
-	ctx->nc_at_chain = netio_context_at_chain;
-	ctx->nc_at_print = netio_context_at_print;
-	ctx->nc_at_reply = netio_context_at_reply;
-	ctx->nc_at_repack = netio_context_at_repack;
+	ctx->nc_at_unpack = netio_context_atunpack;
+	ctx->nc_at_chain = netio_context_atchain;
+	ctx->nc_at_print = netio_context_atprint;
+	ctx->nc_at_reply = netio_context_atreply;
+	ctx->nc_at_repack = netio_context_atrepack;
 
 	return 0;
 }
@@ -72,7 +70,7 @@ int netio_context_unpack(netio_context_t *this, const netio_packet_t *packet)
 int netio_context_print(netio_context_t *this, FILE *f,
 			const netio_header_t *header)
 {
-	return netio_context_at_print(this, f, header->nh_prev, header);
+	return netio_context_atprint(this, f, header->nh_prev, header);
 }
 
 int netio_context_reply(netio_context_t *this, const netio_header_t *header)
@@ -109,7 +107,7 @@ int netio_context_repack(netio_context_t *this, netio_packet_t *packet,
 int netio_context_setatunpack(netio_context_t *this, netio_at_unpack_t handle)
 {
 	if (!handle)
-		handle = netio_context_at_unpack;
+		handle = netio_context_atunpack;
 	this->nc_at_unpack = handle;
 
 	return 0;
@@ -118,7 +116,7 @@ int netio_context_setatunpack(netio_context_t *this, netio_at_unpack_t handle)
 int netio_context_setatchain(netio_context_t *this, netio_at_chain_t handle)
 {
 	if (!handle)
-		handle = netio_context_at_chain;
+		handle = netio_context_atchain;
 	this->nc_at_chain = handle;
 
 	return 0;
@@ -127,7 +125,7 @@ int netio_context_setatchain(netio_context_t *this, netio_at_chain_t handle)
 int netio_context_setatprint(netio_context_t *this, netio_at_print_t handle)
 {
 	if (!handle)
-		handle = netio_context_at_print;
+		handle = netio_context_atprint;
 	this->nc_at_print = handle;
 	
 	return 0;
@@ -136,7 +134,7 @@ int netio_context_setatprint(netio_context_t *this, netio_at_print_t handle)
 int netio_context_setatreply(netio_context_t *this, netio_at_reply_t handle)
 {
 	if (!handle)
-		handle = netio_context_at_reply;
+		handle = netio_context_atreply;
 	this->nc_at_reply = handle;
 
 	return 0;
@@ -145,7 +143,7 @@ int netio_context_setatreply(netio_context_t *this, netio_at_reply_t handle)
 int netio_context_setatrepack(netio_context_t *this, netio_at_repack_t handle)
 {
 	if (!handle)
-		handle = netio_context_at_repack;
+		handle = netio_context_atrepack;
 	this->nc_at_repack = handle;
 
 	return 0;

@@ -17,7 +17,7 @@ static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
 {
 	if (data == NULL)
 		return netio_context_print(ctx, stdout, cur->nh_head);
-	return cur->nh_protocol->np_chain(ctx, cur, data, size);
+	return netio_context_atunpack(ctx, cur, data, size);
 }
 
 

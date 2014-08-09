@@ -99,3 +99,9 @@ int netio_ipaddr_toarr(const netio_ipaddr_t *this, char *arr)
 	*((netio_ipaddr_t *) arr) = *this;
 	return 0;
 }
+
+
+int netio_ipaddr_cmp(const netio_ipaddr_t *a, const netio_ipaddr_t *b)
+{
+	return memcmp(a->nip_arr, b->nip_arr, sizeof(a->nip_arr));
+}
