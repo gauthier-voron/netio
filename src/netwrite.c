@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <errno.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
 #include <signal.h>
@@ -108,7 +109,7 @@ static void usage(void)
 	       "program needs to be run\n"
 	       "as root or with the cap_net_raw capability. The injection "
 	       "stops when receiving\n"
-	       "an INT, QUIT or TERM signal.\n");
+	       "an INT, QUIT or TERM signal or stdin closes.\n");
 }
 
 
@@ -139,10 +140,13 @@ int main(int argc, const char **argv)
 		return EXIT_FAILURE;
 
 	while (!killed) {
-		if (netio_packet_read(&packet, STDIN_FILENO) == -1)
-			continue;
+		if (netio_packet_read(&packet, STDIN_FILENO) == -1) {
+			if (errno == EAGAIN || errno == EINTR)
+				continue;
+			break;
+		}
 		if (netio_packet_netwrite(&packet) == -1)
-			continue;
+			break;
 	}
 
 	close_sock();
