@@ -27,7 +27,6 @@
 #include "netio/ethernet.h"
 #include "netio/ipaddr.h"
 #include "netio/macaddr.h"
-#include "netio/netio.h"
 #include "netio/packet.h"
 #include "netio/protocol.h"
 
