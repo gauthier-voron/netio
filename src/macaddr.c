@@ -78,7 +78,7 @@ int netio_macaddr_fromifn(netio_macaddr_t *this, const char *ifn)
 	if (close(fd) != 0 || ret != 0)
 		return -1;
 
-	*this = *((netio_macaddr_t *) ifreq.ifr_hwaddr.sa_data);
+	memcpy(this, &ifreq.ifr_hwaddr.sa_data, sizeof(this->nmac_arr));
 	return 0;
 }
 
