@@ -18,17 +18,9 @@
  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include "netio/arp.h"
 #include "netio/context.h"
-#include "netio/device.h"
-#include "netio/ethernet.h"
-#include "netio/ipaddr.h"
-#include "netio/macaddr.h"
 #include "netio/packet.h"
-#include "netio/protocol.h"
 
 
 static int user_at_unpack(netio_context_t *ctx, netio_header_t *cur,
