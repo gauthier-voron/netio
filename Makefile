@@ -17,7 +17,7 @@ CC      := gcc
 CCFLAGS := -Wall -Wextra -pedantic -Werror -O2 -g -DVERSION=\"$(VERSION)\"
 CSFLAGS := -fPIC -DNETIO_VERSION=\"$(VERSION)\"
 LDFLAGS := 
-LSFLAGS := -shared
+LSFLAGS := -shared -Wl,-soname=libnetio.so.$(MAJOR-VERSION)
 
 NETIO_OBJECTS += context header device raw   # netio core
 NETIO_OBJECTS += packet ipaddr macaddr       # netio api
@@ -88,6 +88,9 @@ install: all installdirs
           2>/dev/null || true
 	$(Q)ln -s libnetio.so.$(VERSION) \
               $(prefix)/usr/lib/libnetio.so.$(MAJOR-VERSION)
+	$(Q)-rm $(prefix)/usr/lib/libnetio.so \
+          2>/dev/null || true
+	$(Q)ln -s libnetio.so.$(VERSION) $(prefix)/usr/lib/libnetio.so
 	$(call cmd-print,  INSTALL manpages)
 	$(Q)-for f in $(notdir $(wildcard $(MAN)*.1)) ; do \
             gzip -c $(MAN)$$f > $(prefix)/usr/share/man/man1/$$f.gz ; \
@@ -113,7 +116,7 @@ uninstall:
 	$(Q)rm $(prefix)/usr/bin/netread
 	$(Q)rm $(prefix)/usr/bin/netwrite
 	$(call cmd-print,  UNSTALL libraries)
-	$(Q)rm $(prefix)/usr/lib/libnetio.so.*
+	$(Q)rm $(prefix)/usr/lib/libnetio.so*
 	$(call cmd-print,  UNSTALL manpages)
 	$(Q)-for f in $(notdir $(wildcard $(MAN)*.1)) ; do \
             rm $(prefix)/usr/share/man/man1/$$f.gz ; \
@@ -149,7 +152,10 @@ $(BIN)netprint: $(OBJ)netprint.o $(LIB)libnetio.so | $(BIN)
 	$(Q)$(CC) $^ -o $@ $(LDFLAGS) -L$(LIB) -lnetio
 
 
-$(LIB)libnetio.so: | $(LIB)libnetio.so.$(VERSION) $(LIB)
+$(LIB)libnetio.so: | $(LIB)libnetio.so.$(MAJOR-VERSION) $(LIB)
+	$(call cmd-print,  LN      $@)
+	$(Q)ln -s libnetio.so.$(VERSION) $@
+$(LIB)libnetio.so.$(MAJOR-VERSION): | $(LIB)libnetio.so.$(VERSION) $(LIB)
 	$(call cmd-print,  LN      $@)
 	$(Q)ln -s libnetio.so.$(VERSION) $@
 $(LIB)libnetio.so.$(VERSION): $(patsubst %,$(OBJ)%.so,$(NETIO_OBJECTS)) |$(LIB)
