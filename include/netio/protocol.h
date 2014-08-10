@@ -32,42 +32,15 @@ typedef struct netio_protocol netio_protocol_t;
 #include "netio/protocol.h"
 
 
-/*
- * Protocol specific unpacking function.
- * Implementation should:
- * - allocate a protocol specific object on stack which must have a
- *   netio_header_t as first field.
- * - fill this object with informations extracted from the "data" field.
- * - link it with the previous object "prev".
- * - call the unpack function of the context "ctx" and return the result
- *   immediately.
- */
 typedef int (*netio_unpack_t)(netio_context_t *ctx, netio_header_t *prev,
 			      const char *data, size_t size);
 
-/*
- * Protocol specific payload chaining function.
- * Implementation should:
- * - cast the given "cur" header as a protocol specific object pointer.
- * - use it to determine what is the payload protocol
- * - call the chain function of the context "ctx" and return the result
- *   immediately.
- */
 typedef int (*netio_chain_t)(netio_context_t *ctx, netio_header_t *cur,
 			     const char *data, size_t size);
 
 typedef int (*netio_print_t)(netio_context_t *ctx, FILE *f,
 			     const netio_header_t *cur);
 
-/*
- * Protocol specific reply function.
- * Implementation should:
- * - compute reply addresses when possible (basing on "req").
- * - compute every packet length fields since the payloads (in "next") are
- *   already computed.
- * - compute every checksum fields.
- * - not make any assumptions on the packet semantic.
- */
 typedef int (*netio_reply_t)(netio_context_t *ctx, netio_header_t *next,
 			     const netio_header_t *req);
 
