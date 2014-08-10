@@ -1,0 +1,31 @@
+.TH NETIO_CONTEXT_UNPACK 3 2014-08-09 Linux "Linux Programmer's Manual"
+.SH NAME
+netio_context_unpack \- unpack a network packet
+.SH SYNOPSIS
+.nf
+.B #include <netio/context.h>
+
+.BI "int netio_context_unpack(netio_context_t *" this ,
+.BI "                         const netio_packet_t *" packet ");"
+.fi
+.sp
+Compile and link with \fI\-netio\fP.
+.SH DESCRIPTION
+The
+.BR netio_context_unpack ()
+function splits a network packet pointed by
+.IR packet
+into several protocol independant headers which can then be easily used inside
+a hook of the context pointed by
+.IR this .
+.SH RETURN VALUE
+On success,
+.BR netio_context_unpack ()
+returns 0;
+on error, it returns an error number.
+.SH SEE ALSO
+.BR netio (7),
+.BR netio_context_init (3),
+.BR netio_context_setatunpack (3),
+.BR netio_context_setatchain (3),
+.BR netio_packet_read (3)

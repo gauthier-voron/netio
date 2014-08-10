@@ -1,0 +1,62 @@
+Netio: low level network input / output
+=======================================
+
+
+What is this ?
+--------------
+
+Netio is a set of tools used to capture, parse, modify and inject network
+packets at a low level (starting from OSI layer 2). It is composed of:
+
+  - the libnetio.so library which contains functions to parse and modify
+    packets
+
+  - the netread binary which can be used to capture packets at a low level
+
+  - the netwrite binary which can be used to inject packets at a low level
+
+This package also contains documentation for the Netio components and some
+examples of utilization.
+
+
+How to build it ?
+-----------------
+
+To build the Netio tools, you can simply run `make` at the root of the package.
+You can also build example binaries by running `make examples`. Once built, you
+can install the package by running `make install`.
+
+Please note the binaries netread and netwrite will not be usable right after
+building. Because these programs need special privileges to run correctly, you
+have to either run them as root or set the net_cap_raw capability for the
+binaries. The capability setting is done automatically at install stage.
+
+
+How to use it ?
+---------------
+
+Once the package is installed, you can build your programs using the library
+by simply adding `-lnetio` at linking time (the library is installed in
+'/usr/lib/').
+
+The typicall architecture of a software using Netio is a pipeline of three
+binaries:
+
+  1. netread to capture packets from the network and dump them on its standard
+     output.
+
+  2. this output is piped in your binary standard input where you can parse
+     them, modify them, etc... then dumping the reply packets on the standard
+     output.
+
+  3. this output is piped in the netwrite standard input which will inject
+     them in the network.
+
+This is the prefered way to use Netio but you are free to add or remove stages
+to this pipeline, or not use a pipeline structure at all.
+
+
+
+
+Copyright (c) 2014 Gauthier Voron
+<gauthier.voron@mnesic.fr>

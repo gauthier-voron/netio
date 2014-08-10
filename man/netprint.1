@@ -1,0 +1,56 @@
+.TH NETPRINT 1 2014-08-09 GNU "Linux Programmer's Manual"
+.SH NAME
+netprint \- network dump example program of Netio library
+.SH SYNOPSIS
+.B netprint
+.SH DESCRIPTION
+.IR Netprint
+reads network packets on its standard input and print them on its standard
+output with a human readable format.
+This is actually an example program provided with the Netio library and users
+are encouraged to read its (small) source code.
+.SH RETURN VALUE
+.IR Netprint
+always return 0.
+.SH EXAMPLE
+This program should be used taking its input on the
+.IR netread
+program provided with the Netio library.
+
+.RS 3
+$ netread | netprint
+.RE
+
+This invocaction could print something like this
+
+.RS 3
+ device
+   interface name               eth0
+ ethernet
+   destination                  e0:46:9a:ee:db:80
+   source                       48:5b:39:2a:06:74
+   type                         ip (0x0800)
+ ip
+   version                      4
+   internet header length       5
+   type of service              00000000
+     routine                    000.....
+     normal delay               ...0....
+     normal throughput          ....0...
+     normal reliblity           .....0..
+   total length                 52
+   identification               45405
+   flags                        010
+     don't fragment             .1.
+     last fragment              ..0
+   fragment offset              0
+   time to live                 64
+   protocol                     tcp (0x06)
+   header checksum              0xf215
+   source                       192.168.0.12
+   destination                  173.194.40.218
+ ...
+.RE
+.SH SEE ALSO
+.BR netio (7),
+.BR netread (1)
