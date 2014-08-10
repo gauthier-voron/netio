@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) 20014 Gauthier Voron.
+ *
+ * This file is part of Netio.
+ *
+ * Netio is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * Netio is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * Netio. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+
 #ifndef NETIO_CONTEXT_H
 #define NETIO_CONTEXT_H
 
@@ -11,23 +31,9 @@ typedef struct netio_context netio_context_t;
 #include "netio/protocol.h"
 
 
-/*
- * Context specific post unpack handler.
- * Implementation can be used to perform user related treatment in a given
- * context right after the last payload has been unpacked.
- * To continue the unpacking normally, implementation should call the
- * chain function of the current protocol "cur->nh_protocol->np_chain".
- */
 typedef int (*netio_at_unpack_t)(netio_context_t *ctx, netio_header_t *cur,
 				 const char *payload, size_t size);
 
-/*
- * Context specific post chain handler.
- * Implementation can be used to perform user related treatment in a given
- * context right after the last chaining.
- * To continue the unpacking normally, implementation should call the
- * unpack function of the next protocol "next->np_unpack".
- */
 typedef int (*netio_at_chain_t)(netio_context_t *ctx, netio_header_t *prev,
 				const char *payload, size_t size,
 				const netio_protocol_t *next);
@@ -36,23 +42,9 @@ typedef int (*netio_at_print_t)(netio_context_t *ctx, FILE *f,
 				const netio_header_t *prev,
 				const netio_header_t *next);
 
-/*
- * Context specific post reply handle.
- * Implementation can be used to perform user related treatment in a given
- * context right after the default reply.
- * Default reply are best-effort and try to resolve as much field as possible.
- * Other fields are not filled and contain unspecified values.
- */
 typedef int (*netio_at_reply_t)(netio_context_t *ctx, netio_header_t *rep,
 				const netio_header_t *req);
 
-/*
- * Context specific post repack handle.
- * Implementation can be used to perform user related treatment in a given
- * context right after the repacking.
- * To continue the repacking normally, implementation should call the repack
- * function of next->nh_protocol->np_repack
- */
 typedef int (*netio_at_repack_t)(netio_context_t *ctx,
 				 const netio_header_t *next, char *data,
 				 size_t *size);
