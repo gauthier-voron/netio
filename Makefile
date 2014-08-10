@@ -26,7 +26,7 @@ NETIO_OBJECTS += arp ethernet ip udp         # netio protocols
 
 MAKEFLAGS += -rR --no-print-directory
 
-config-targets := clean .depends
+config-targets := uninstall clean .depends
 ifeq ($(filter $(config-targets), $(MAKECMDGOALS)),)
   mode := build
 else
